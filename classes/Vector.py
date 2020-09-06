@@ -17,6 +17,10 @@ class Vector2D:
         self.y = y
     
 
+    @classmethod
+    def fromTuple(cls, t: tuple):
+        return cls(t[0], t[1])
+
     ### Normal Algebraic func
     def __add__(self, other: Vector2D) -> Vector2D:
         """Add two vectors together using the '+' operator
@@ -90,6 +94,14 @@ class Vector2D:
         return f"Vector2D({self.x}, {self.y})"
 
     def __abs__(self):
+        """The equivalent of | v | in mathematics
+
+        Abs is the | | function and calculates the length of a vector
+        using the Pythagorem Formula.
+
+        Returns:
+        `float` The length of the vector
+        """
         return math.sqrt(self.x**2 + self.y**2)
     
     def dot(self, other: Vector2D):
@@ -114,17 +126,14 @@ class Vector2D:
         Args: other - _optional_ 'Vector'
         """
         if(type(other) == Vector2D):
-            return math.acos((self @ other)/abs(self) * abs(other))
+            return math.degrees(math.acos((self @ other)/abs(self) * abs(other)))
         elif(other == None):
-            return math.acos(self.x /abs(self))
-
-def funcname(self, parameter_list) -> Vector2D:
-    pass
+            return  math.degrees(math.acos(self.x /abs(self)))
 
 ### Testing###
 if __name__ == "__main__":
-    v1 = Vector2D(1,0)
-    print(v1.rotation(),math.pi/4)
+    v1 = Vector2D(0,0)
+    print(v1.rotation())
 
     v2 = Vector2D(1,-1)
     print(v2.rotation())

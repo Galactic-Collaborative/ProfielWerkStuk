@@ -3,3 +3,4 @@ _pycache_/*
 .vs/
 *.pyc
 *.cpython-37.pyc
+test.py

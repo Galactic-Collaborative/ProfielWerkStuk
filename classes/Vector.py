@@ -20,6 +20,10 @@ class Vector2D:
     @classmethod
     def fromTuple(cls, t: tuple):
         return cls(t[0], t[1])
+    
+    @classmethod
+    def fromAngle(cls, angle):
+        return cls(math.sin(angle), math.cos(angle))
 
     ### Normal Algebraic func
     def __add__(self, other: Vector2D) -> Vector2D:
@@ -117,7 +121,7 @@ class Vector2D:
         else:
             raise TypeError(f"Type of other vector is not valid: '{type(other).__name__}' is not a valid Vector2D");
 
-    def rotation(self, other=None):
+    def rotation(self, other=None, degrees=True):
         """Calculate the rotation of one or two vectors
 
         The rotation is calculated with the vector (1,0)
@@ -126,14 +130,37 @@ class Vector2D:
         Args: other - _optional_ 'Vector'
         """
         if(type(other) == Vector2D):
-            return math.degrees(math.acos((self @ other)/abs(self) * abs(other)))
+            angle = math.acos((self @ other)/abs(self) * abs(other))
         elif(other == None):
-            return  math.degrees(math.acos(self.x /abs(self)))
+            angle = math.atan2(self.y, self.x)
+        else:
+            raise TypeError(f"Type of other vector is not valid: '{type(other).__name__}' is not a valid Vector2D");
+
+        if(degrees):
+            return math.degrees(angle)
+        else:
+            return angle
+
+    
+    def limit(self, limit):
+        """Limit the length of the vector
+
+        The vector will be scaled to the given limit if it exceeds the limit.
+
+        Args: limit - `int`
+        """
+        if abs(self) > limit:
+            angle = self.rotation(degrees=False)
+            x = math.cos(angle) * limit
+            y = math.sin(angle) * limit
+            self.x, self.y = x, y
+        
+        return self
 
 ### Testing###
 if __name__ == "__main__":
-    v1 = Vector2D(0,0)
-    print(v1.rotation())
+    v1 = Vector2D(-1,-1)
+    print(v1.rotation(degrees=True))
 
     v2 = Vector2D(1,-1)
     print(v2.rotation())
@@ -147,3 +174,9 @@ if __name__ == "__main__":
     print(v1 + v2)
     print(v2 - v1)
     print(abs(v1))
+
+    v4 = Vector2D(0,6)
+    v4.limit(5)
+    print(v4)
+
+    print(Vector2D(0,6).limit(5))

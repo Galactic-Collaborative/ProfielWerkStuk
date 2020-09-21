@@ -1,10 +1,10 @@
-import pyglet;
+import pyglet
 from classes.Vector import Vector2D
 import random
 import math
 
 
-running = True;
+running = True
 
 class Brain:
     def __init__(self, count) -> None:
@@ -13,7 +13,7 @@ class Brain:
     
     def clone(self):
         clone = Brain(len(self.instructions))
-        clone.instructions = self.instructions
+        clone.instructions = self.instructions[:]
         return clone
     
     def mutate(self):
@@ -24,7 +24,7 @@ class Brain:
                 self.instructions[i] = Vector2D.fromAngle(random.random()*2*math.pi) #Set direction to random angle
 
 class Dot:
-    def __init__(self, window, goal) -> None:
+    def __init__(self, window, goal, best=False) -> None:
         self.pos = Vector2D(100,100)
         self.vel = Vector2D(0,0)
         self.acc = Vector2D(0,0)
@@ -32,27 +32,33 @@ class Dot:
         self.goal = goal
         
         self.brain = Brain(1000)
-        self.fitness = 0;
+        self.fitness = 0
         self.window = window
 
-        self.dead = False;
-        self.finished = False;
+        self.bestDot = best
+        self.dead = False
+        self.finished = False
     
     def draw(self, batch):
         if(self.dead): 
-            color = (255,0,0) 
+            color = (255,0,0)
+            opacity = 100
+        elif(self.bestDot):
+            color = (0,255,0)
+            opacity = 255
         else: 
             color = (255,255,255)
+            opacity = 100
         dot = pyglet.shapes.Circle(self.pos.x, self.pos.y, 5, color=color, batch=batch)
-        dot.opacity = 100
+        dot.opacity = opacity
         return dot
             
     def move(self):
         if(self.brain.step < len(self.brain.instructions)):
             self.acc = self.brain.instructions[self.brain.step]
-            self.brain.step += 1;
+            self.brain.step += 1
         else:
-            self.dead = True;
+            self.dead = True
         
         self.vel += self.acc
         self.vel.limit(5)
@@ -60,13 +66,13 @@ class Dot:
 
     def update(self):
         if not self.dead and not self.finished:
-            self.move();
+            self.move()
 
             pos = self.pos
             if(pos.x < 2 or pos.y < 2 or pos.x > self.window.x-2 or pos.y > self.window.y-2):
-                self.dead = True;
+                self.dead = True
             elif(abs(self.goal - self.pos) < 10):
-                self.finished = True;
+                self.finished = True
     
     def calcFitness(self):
         if self.finished:
@@ -74,8 +80,8 @@ class Dot:
         else:
             self.fitness = 1/(abs(self.goal - self.pos)**2)
 
-    def clone(self):
-        baby = Dot(window=self.window,goal=self.goal)
+    def clone(self, best=False):
+        baby = Dot(window=self.window,goal=self.goal, best=best)
         baby.brain = self.brain.clone()
         return baby
 
@@ -85,12 +91,12 @@ class World:
         self.goal = self.window
         self.dotList = [Dot(window=self.window,goal=(self.goal-Vector2D(10,10))) for _ in range(dots)]
 
-        self.fitnessSum = 0;
-        self.gen = 1;
+        self.fitnessSum = 0
+        self.gen = 1
 
-        self.bestDot = 0;
+        self.bestDot = 0
 
-        self.minStep = 1000;
+        self.minStep = 1000
     
     def draw(self, batch):
         drawList = [dot.draw(batch) for dot in self.dotList]
@@ -118,12 +124,12 @@ class World:
         self.setBestDot()
         self.calcFitnessSum()
 
-        nextGen.append(self.dotList[self.bestDot].clone())
+        nextGen.append(self.dotList[self.bestDot].clone(best=True))
         for _ in range(1, len(self.dotList)):
             parent = self.selectParent()
             nextGen.append(parent.clone())
         
-        self.dotList = nextGen
+        self.dotList = nextGen[:]
         self.gen+=1
         print(f"NEXT GEN: {self.gen}")
     
@@ -134,7 +140,7 @@ class World:
 
     def selectParent(self):
         rand = random.random() * self.fitnessSum
-        runningSum = 0;
+        runningSum = 0
 
         for dot in self.dotList:
             runningSum += dot.fitness
@@ -145,14 +151,14 @@ class World:
         return None
 
     def calcFitnessSum(self):
-        fsum = 0;
+        fsum = 0
         for dot in self.dotList: 
             fsum += dot.fitness
         self.fitnessSum = fsum
 
     def setBestDot(self):
-        topFitness = 0;
-        self.bestDot = 0;
+        topFitness = 0
+        self.bestDot = 0
         for i, dot in enumerate(self.dotList):
             if(dot.fitness > topFitness):
                 topFitness = dot.fitness
@@ -162,8 +168,8 @@ class World:
             self.minStep = self.dotList[self.bestDot].brain.step
 
 ### MAIN LOOP
-config = pyglet.gl.Config(sample_buffers=1, samples=4)
-window = pyglet.window.Window(config=config, resizable=True, fullscreen=True) 
+# config = pyglet.gl.Config(sample_buffers=1, samples=4)
+window = pyglet.window.Window(resizable=True, fullscreen=True) 
 
 world = World(1000, window=window.get_size())
 batch = pyglet.graphics.Batch()
@@ -197,8 +203,3 @@ if __name__ == "__main__":
     pyglet.app.run()
 
 #Setup
-
-
-    
-        
-

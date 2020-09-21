@@ -1,6 +1,5 @@
 import math
 import typing
-import numpy as np
 
 # Typing
 Vector2D = typing.NewType("Vector2D", object)

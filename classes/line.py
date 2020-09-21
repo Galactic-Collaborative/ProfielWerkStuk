@@ -55,7 +55,6 @@ class linline:
         rc = (b.y - a.y)/(b.x - a.x)
         p = a.y - rc * a.x
         limit = [a.x, b.x]
-        print(f"Limit: {limit}")
 
         return cls(rc, p, sorted(limit))
 

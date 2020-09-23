@@ -152,7 +152,7 @@ class Vector2D:
             angle = self.rotation(degrees=False)
             x = math.cos(angle) * limit
             y = math.sin(angle) * limit
-            self.x, self.y = x, y
+            self.x, self.y = round(x, 2), round(y, 2)
         
         return self
 

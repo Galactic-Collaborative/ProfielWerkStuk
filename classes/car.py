@@ -1,147 +1,85 @@
-import pyglet, math
-from pyglet.gl import *
+import pyglet
 from Vector import Vector2D
-from typing import NewType
-
-key = pyglet.window.key
-speed = 1.0
 
 class Car():
     def __init__(self, x: int, y: int):
         self.position = Vector2D(x, y)
-        self.v_acceleration = Vector2D(0,0)
-        self.v_velocity = Vector2D(0,0)
+        self.acceleration = Vector2D(0,0)
+        self.velocity = Vector2D(0,0)
+        self.mass = 1
         self.rotation = 0
         self.limiet = 2
         self.limiet2 = -2
 
-    def drawCar(self):
-        car = pyglet.sprite.Sprite(pyglet.resource.image('car2.png'), x=self.position.x, y=self.position.y)
+    def draw(self, batch):
+        car = self.drawCar(batch)
+        return car
+
+    def drawCar(self, batch):
+        car = pyglet.sprite.Sprite(pyglet.resource.image('car.png'), x=self.position.x, y=self.position.y, batch=batch)
         car.scale = 0.5
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
-        car.rotation = -(self.rotation)
-        car.draw()
+        car.rotation = -(self.velocity.rotation())
+        return car
 
-    def drawInfo(self):
-        self.labelA = pyglet.text.Label(str(self.v_acceleration.x), font_name='Times New Roman', font_size=36, x=50, y=950, anchor_x='left', anchor_y='center')
-        self.labelA.draw()
-        self.labelB = pyglet.text.Label(str(self.v_acceleration.y), font_name='Times New Roman', font_size=36, x=50, y=900, anchor_x='left', anchor_y='center')
-        self.labelB.draw()
-        self.labelC = pyglet.text.Label(str(self.rotation), font_name='Times New Roman', font_size=36, x=50, y=850, anchor_x='left', anchor_y='center')
-        self.labelC.draw()
-        self.labelD = pyglet.text.Label(str(self.v_velocity.x), font_name='Times New Roman', font_size=36, x=50, y=800, anchor_x='left', anchor_y='center')
-        self.labelD.draw()
-        self.labelE = pyglet.text.Label(str(self.v_velocity.y), font_name='Times New Roman', font_size=36, x=50, y=750, anchor_x='left', anchor_y='center')
-        self.labelE.draw()
-    #     self.labelV = pyglet.text.Label(self.v_velocity, font_name='Times New Roman', font_size=36, x=400, y=300, anchor_x='center', anchor_y='center')
-
-    def forward(self):
-        self.v_acceleration += Vector2D(1,0)
-
-    def backward(self):
-        self.v_acceleration -= Vector2D(1,0)
-
-    def left(self):
-        self.v_acceleration += Vector2D(0,0.1)
-
-    def right(self):
-        self.v_acceleration -= Vector2D(0,0.1)
-
-    def update(self):
-        self.v_velocity = self.v_acceleration 
-        if self.v_velocity.x >= 0:
-            self.rotation = self.v_velocity.rotation()
-        else:
-            self.rotation = 180-self.v_velocity.rotation()
-        self.v_acceleration.limit(2)
-        # if self.v_acceleration.x >= self.limiet:
-        #     self.v_acceleration.x = self.limiet
-        # if self.v_acceleration.x <= self.limiet2:
-        #     self.v_acceleration.x = self.limiet2
-        # if self.v_acceleration.y >= self.limiet:
-        #     self.v_acceleration.y = self.limiet
-        # if self.v_acceleration.y <= self.limiet2:
-        #     self.v_acceleration.y = self.limiet2
-
-        self.position += self.v_velocity
+    def update(self, dt, key_handler):
+        forces = Vector2D(0,0)
+        if key_handler[key.UP]:
+            forces += Vector2D(100,0);
+        if key_handler[key.DOWN]:
+            forces += Vector2D(-100,0);
+        if key_handler[key.LEFT]:
+            forces += Vector2D(0,100);
+        if key_handler[key.RIGHT]:
+            forces += Vector2D(0,-100);
+        
+        self.acceleration = forces.rotate(self.velocity.rotation()) / self.mass
+        self.acceleration.limit(100)
+        self.velocity += self.acceleration * dt
+        self.velocity.limit(100)
+        self.position += self.velocity * dt
         
     def drive(self):
         self.test = 0
 
+### MAIN LOOP
+# config = pyglet.gl.Config(sample_buffers=1, samples=4)
+window = pyglet.window.Window(resizable=True, fullscreen=False) 
 
-class main(pyglet.window.Window):
-    def __init__ (self, width=1600, height=1000, fps=False, *args, **kwargs):
-        super(main, self).__init__(width, height, *args, **kwargs)
-        self.x, self.y = 0, 0
-        self.alive = 1
+car = Car(100,100)
+batch = pyglet.graphics.Batch()
+running = True
 
-        self.CAR = Car(400, 300)
-        self.up_pressed = False
-        self.down_pressed = False
-        self.left_pressed = False
-        self.right_pressed = False
+key = pyglet.window.key
+key_handler = key.KeyStateHandler()
+speed = 1.0
 
-    def on_draw(self):
-        self.render()
+up_pressed = False
+down_pressed = False
+left_pressed = False
+right_pressed = False
 
-    def on_close(self):
-        self.alive = 0
+@window.event
+def on_close():
+    running = False
 
-    def on_key_press(self, symbol, modifiers):
-        if symbol == key.ESCAPE:
-            self.alive = 0
+@window.event
+def on_draw():
+    render()
 
-        if symbol == key.UP:
-            self.up_pressed = True
+def update(dt):
+    window.push_handlers(key_handler)
+    if(running):
+        car.update(dt, key_handler)
+    else:
+        pyglet.app.exit()
 
-        if symbol == key.DOWN:
-            self.down_pressed = True
+def render():
+    window.clear()
+    _ = car.draw(batch)
+    batch.draw()
 
-        if symbol == key.LEFT:
-            self.left_pressed = True
-
-        if symbol == key.RIGHT:
-            self.right_pressed = True
-
-    def on_key_release(self, symbol, modifiers):
-        if symbol == key.UP:
-            self.up_pressed = False
-
-        if symbol == key.DOWN:
-            self.down_pressed = False
-
-        if symbol == key.LEFT:
-            self.left_pressed = False
-
-        if symbol == key.RIGHT:
-            self.right_pressed = False
-
-    def render(self):
-        self.clear()
-
-        self.CAR.drawCar()
-        self.CAR.drawInfo()
-        
-        if self.up_pressed == True:
-            self.CAR.forward()
-        if self.down_pressed == True:
-            self.CAR.backward()
-        if self.left_pressed == True:
-            self.CAR.left()
-        if self.right_pressed == True:
-            self.CAR.right()
-        self.CAR.update()
-            
-        self.CAR.drive()
-        self.flip()
-
-    def run(self):
-        while self.alive == 1:
-            self.render()
-
-            event = self.dispatch_events()
-
-if __name__ == '__main__':
-    x = main()
-    x.run()
+if __name__ == "__main__":
+    pyglet.clock.schedule_interval(update, 1/120.0)
+    pyglet.app.run()

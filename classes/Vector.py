@@ -55,7 +55,7 @@ class Vector2D:
             return Vector2D(self.x * other, self.y * other);
 
 
-    def __div__(self, other:int) -> Vector2D:
+    def __truediv__(self, other:int) -> Vector2D:
         """Divide a vector using the '/' operator
 
             ### Args:
@@ -156,26 +156,44 @@ class Vector2D:
         
         return self
 
+    def rotate(self, rotation):
+        """Rotate the vector
+
+        The vector is rotated by the given rotation.
+
+        Args: rotation - `float | int` rotation in degrees
+        """
+        rotation = math.radians(rotation)
+        x2 = math.cos(rotation) * self.x - math.sin(rotation) * self.y
+        y2 = math.sin(rotation) * self.x + math.cos(rotation) * self.y
+        self.x = x2
+        self.y = y2
+
+        return self
+
 ### Testing###
 if __name__ == "__main__":
-    v1 = Vector2D(-1,-1)
-    print(v1.rotation(degrees=True))
+    # v1 = Vector2D(-1,-1)
+    # print(v1.rotation(degrees=True))
 
-    v2 = Vector2D(1,-1)
-    print(v2.rotation())
+    # v2 = Vector2D(1,-1)
+    # print(v2.rotation())
 
-    v3 = Vector2D(2,2)
-    v3 += v1;
+    # v3 = Vector2D(2,2)
+    # v3 += v1
 
-    print(v3 * 2.0)
-    print(v1.dot(v2))
-    print(v1.dot(v1))
-    print(v1 + v2)
-    print(v2 - v1)
-    print(abs(v1))
+    # print(v3 * 2.0)
+    # print(v1.dot(v2))
+    # print(v1.dot(v1))
+    # print(v1 + v2)
+    # print(v2 - v1)
+    # print(abs(v1))
 
-    v4 = Vector2D(0,6)
-    v4.limit(5)
-    print(v4)
+    # v4 = Vector2D(0,6)
+    # v4.limit(5)
+    # print(v4)
 
-    print(Vector2D(0,6).limit(5))
+    # print(Vector2D(0,6).limit(5))
+
+    v5 = Vector2D(5,5)
+    print(v5.rotate(90))

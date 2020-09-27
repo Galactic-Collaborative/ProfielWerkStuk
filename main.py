@@ -13,11 +13,6 @@ key = pyglet.window.key
 key_handler = key.KeyStateHandler()
 speed = 1.0
 
-up_pressed = False
-down_pressed = False
-left_pressed = False
-right_pressed = False
-
 @window.event
 def on_close():
     running = False

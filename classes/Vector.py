@@ -156,6 +156,19 @@ class Vector2D:
 
         return self
 
+    def normalize(self):
+        """Normalize the vector
+
+        Args: 
+        """
+        if abs(self) != 0:
+            new_self = self / abs(self)
+            self.x = new_self.x
+            self.y = new_self.y
+            return new_self
+        else:
+            return self
+
 ### Testing###
 if __name__ == "__main__":
     # v1 = Vector2D(-1,-1)

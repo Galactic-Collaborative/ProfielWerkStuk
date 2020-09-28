@@ -143,9 +143,7 @@ class Vector2D:
 
     def rotate(self, rotation):
         """Rotate the vector
-
         The vector is rotated by the given rotation.
-
         Args: rotation - `float | int` rotation in degrees
         """
         rotation = math.radians(rotation)
@@ -156,38 +154,48 @@ class Vector2D:
 
         return self
 
-    def normalize(self):
+    def normalize(self, in_place=True):
         """Normalize the vector
-
         Args: 
         """
         if abs(self) != 0:
             new_self = self / abs(self)
-            self.x = new_self.x
-            self.y = new_self.y
+            if(in_place):
+                self.x = new_self.x
+                self.y = new_self.y
             return new_self
         else:
             return self
+    
+    def copy(self):
+        return Vector2D(self.x, self.y)
 
 ### Testing###
 if __name__ == "__main__":
     # v1 = Vector2D(-1,-1)
     # print(v1.rotation(degrees=True))
 
-    # v2 = Vector2D(1,-1)
+    v2 = Vector2D(50,-100)
     # print(v2.rotation())
 
-    # v3 = Vector2D(2,2)
+    v3 = Vector2D(150,125)
     # v3 += v1
-
-    v3 = Vector2D(2,2)
-    v3 += v1
 
     # v4 = Vector2D(0,6)
     # v4.limit(5)
     # print(v4)
 
     # print(Vector2D(0,6).limit(5))
+
+    # v5 = Vector2D(5,5)
+    # print(v5.rotate(90))
+
+
+    v2.normalize()
+    print(f"V2 normalize:{v2}")
+    print(f"V3 normalize:{v3.normalize(in_place=False)}")
+    d = v2.dot(v3.normalize(in_place=False))
+    print(d)
 
     v5 = Vector2D(5,5)
     print(v5.rotate(90))

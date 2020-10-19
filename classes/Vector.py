@@ -55,7 +55,7 @@ class Vector2D:
             return Vector2D(self.x * other, self.y * other);
 
 
-    def __div__(self, other:int) -> Vector2D:
+    def __truediv__(self, other):
         """Divide a vector using the '/' operator
 
             ### Args:
@@ -140,6 +140,21 @@ class Vector2D:
         else:
             return angle
 
+    def rotate(self, rotation):
+        """Rotate the vector
+
+        The vector is rotated by the given rotation.
+
+        Args: rotation - `float | int` rotation in degrees
+        """
+        rotation = math.radians(rotation)
+        x2 = math.cos(rotation)  * self.x - math.sin(rotation) * self.y
+        y2 = math.sin(rotation)  * self.x + math.cos(rotation) * self.y
+        self.x = x2
+        self.y = y2
+
+        return self
+
     
     def limit(self, limit):
         """Limit the length of the vector
@@ -152,30 +167,41 @@ class Vector2D:
             angle = self.rotation(degrees=False)
             x = math.cos(angle) * limit
             y = math.sin(angle) * limit
-            self.x, self.y = round(x, 2), round(y, 2)
+            self.x, self.y = x, y
         
         return self
 
 ### Testing###
 if __name__ == "__main__":
-    v1 = Vector2D(-1,-1)
-    print(v1.rotation(degrees=True))
+    # v1 = Vector2D(-1,-1)
+    # print(v1.rotation(degrees=True))
 
-    v2 = Vector2D(1,-1)
-    print(v2.rotation())
+    # v2 = Vector2D(1,-1)
+    # print(v2.rotation())
 
-    v3 = Vector2D(2,2)
-    v3 += v1;
+    # v3 = Vector2D(2,2)
+    # v3 += v1;
 
-    print(v3 * 2.0)
-    print(v1.dot(v2))
-    print(v1.dot(v1))
-    print(v1 + v2)
-    print(v2 - v1)
-    print(abs(v1))
+    # print(v3 * 2.0)
+    # print(v1.dot(v2))
+    # print(v1.dot(v1))
+    # print(v1 + v2)
+    # print(v2 - v1)
+    # print(abs(v1))
 
-    v4 = Vector2D(0,6)
-    v4.limit(5)
-    print(v4)
+    # v4 = Vector2D(0,6)
+    # v4.limit(5)
+    # print(v4)
 
-    print(Vector2D(0,6).limit(5))
+    # v5 = Vector2D(2.7,1.8)
+    # v5.limit(2)
+    # print(v5)
+
+    v6 = Vector2D(5,5)
+    print(v6.rotate(90))
+    print(v6 / 2)
+
+    # for x in range(-10,10):
+    #     for y in range(-10,10):
+    #         v = Vector2D(x,y)
+    #         print(f"{v}: length: {abs(v)} rotation: {v.rotation()}\nv_limit: {v.limit(5)} -> length: {abs(v.limit(5))}, rotation: {v.rotation()}\n----------------------------------------------")

@@ -1,6 +1,7 @@
 from Vector import Vector2D
 from typing import NewType, Union
 import math
+import pyglet
 
 linline = NewType("linline", object)
 
@@ -91,6 +92,36 @@ class linline:
                 raise ValueError(f"Domain Error: x value does not meet the domain ({self.limit})") 
 
         return self.rc * x + self.b
+    
+    def draw(self, batch, screen=[1920,1080]):
+        """Draw the line on the screen
+
+        If the line is limited, it will draw the limited line in its whole.
+        When the line is infinite, it will only draw the visible line.
+
+        Args:
+            screen: list containting ints; The width and height of the monitor in pixels.
+        """
+
+        if self.limit == [-math.inf,math.inf] and self.rc != 0:
+            new_limit = [0,screen[0]];
+            if not (0<=self.calc(0)<=screen[1]):
+                if(self.rc > 0):
+                    new_limit[0] = 0
+                else:
+                    new_limit[0] = screen[0]
+            
+            if not (0<=self.calc(screen[0])<=screen[1]):
+                if(self.rc > 0):
+                    new_limit[0] = screen[0]
+                else:
+                    new_limit[0] = 0
+        else:
+            new_limit = self.limit
+        
+        pos = new_limit
+        line = pyglet.shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[0]), width=1, color=(255,255,255), batch=batch)
+        return line
 
     def __str__(self):
         return f"Linear Line: {self.rc}x + {self.b} -> Limit: {self.limit}"

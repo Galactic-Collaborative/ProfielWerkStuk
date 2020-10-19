@@ -24,7 +24,7 @@ def on_draw():
 def update(dt):
     window.push_handlers(key_handler)
     if(running):
-        car.update(dt, key_handler)
+        car.update(dt, key, key_handler)
     else:
         pyglet.app.exit()
 

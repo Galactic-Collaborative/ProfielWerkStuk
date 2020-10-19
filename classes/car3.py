@@ -8,6 +8,7 @@ class Car():
         self.velocity = Vector2D(0,0)
         self.mass = 1
         self.rotation = 0
+        self.wheel_base = 70
 
     def draw(self, batch):
         car = self.drawCar(batch)
@@ -42,10 +43,32 @@ class Car():
 
         self.acceleration = forces.rotate(self.velocity.rotation()) / self.mass
         self.acceleration.limit(100)
-        self.velocity += self.acceleration * dt
+        print(f"Acceleration: {self.acceleration}")
+
+        self.rear_wheel = self.position.copy()
+        self.front_wheel = self.position.copy()
+
+        self.rear_wheel.x = self.rear_wheel.x - self.rear_wheel.x * (self.wheel_base / 2)
+        self.front_wheel.x = self.front_wheel.x + self.front_wheel.x * (self.wheel_base / 2)
+        self.rear_wheel += self.velocity * dt
+        self.front_wheel += self.velocity.rotate(self.velocity.rotation()) * dt
+        self.new_heading = (self.front_wheel - self.rear_wheel).normalize()
+        print(f"New heading: {self.new_heading}")
+        print(f"Velocity normalized: {self.velocity.normalize(in_place=False)}")
+        self.d = self.new_heading.dot(self.velocity.normalize(in_place=False))
+        print(f"Self d: {self.d}")
+        if self.d > 0:
+            self.velocity += self.acceleration * dt
+        if self.d < 0:
+            self.velocity -= self.acceleration * dt
+
         self.velocity.limit(100)
+        print(f"Velocity: {self.velocity}")
+        print(f"PositionBefore: {self.position}")
         self.position += self.velocity * dt
-        self.rotation = self.velocity.rotation()
+        print(f"PositionAfter: {self.position}")
+        self.rotation = self.new_heading.rotation()
+        print(" ")
 
     def drive(self):
         self.test = 0

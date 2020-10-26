@@ -1,5 +1,5 @@
 import pyglet
-from classes.car2 import Car
+from classes.car5 import Car
 
 ### MAIN LOOP
 # config = pyglet.gl.Config(sample_buffers=1, samples=4)

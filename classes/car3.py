@@ -1,14 +1,24 @@
 import pyglet
+import math
 from classes.Vector import Vector2D
 
 class Car():
-    def __init__(self, x: int, y: int):
-        self.position = Vector2D(x, y)
+    def __init__(self, x:int, y:int):
+        self.wheel_base = 70
+        self.steering_angle = 15
+        self.engine_power = 800
+        self.friction = -0.9
+        self.drag = -0.001
+        self.braking = -450
+        self.max_speed_reverse = 250
+        self.slip_speed = 400
+        self.traction_fast = 0.1
+        self.traction_slow = 0.7
         self.acceleration = Vector2D(0,0)
         self.velocity = Vector2D(0,0)
-        self.mass = 1
+        self.steer_direction = 0
+        self.position = Vector2D(0,0)
         self.rotation = 0
-        self.wheel_base = 70
 
     def draw(self, batch):
         car = self.drawCar(batch)
@@ -19,56 +29,125 @@ class Car():
         car.scale = 0.5
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
-        # car.rotation = -(self.velocity.rotation())
         car.rotation = -(self.rotation)
         return car
 
     def update(self, dt, key, key_handler):
-        forces = Vector2D(0,0)
-        if key_handler[key.UP]:
-            forces += Vector2D(100,0)
-        if key_handler[key.DOWN]:
-            forces += Vector2D(-100,0)
+        self.acceleration = Vector2D(0,0)
+        self.get_input(key, key_handler)
+        self.apply_friction()
+        self.calculate_steering(dt)
+        self.velocity += self.acceleration * dt
+        # self.velocity = move_and_slide(self.velocity)
+
+    def apply_friction(self):
+        if abs(self.velocity) < 5:
+            self.velocity = Vector2D(0,0)
+        friction_force = self.velocity * self.friction
+        drag_force = self.velocity * abs(self.velocity) * self.drag
+        self.acceleration += drag_force + friction_force
+
+    def get_input(self, key, key_handler):
+        turn = 0
         if key_handler[key.LEFT]:
-            forces += Vector2D(0,100)
+            turn += 1
         if key_handler[key.RIGHT]:
-            forces += Vector2D(0,-100)
-        if key_handler[key.SPACE]:
-            if self.velocity.x > 2:
-                forces += Vector2D(-150, 0)
-            elif self.velocity.x < -2:
-                forces += Vector2D(-150, 0)
-            # else:
-            #     self.velocity.limit(0)
+            turn -= 1
 
-        self.acceleration = forces.rotate(self.velocity.rotation()) / self.mass
-        self.acceleration.limit(100)
-        print(f"Acceleration: {self.acceleration}")
+        self.steer_direction = turn * self.steering_angle
 
-        self.rear_wheel = self.position.copy()
-        self.front_wheel = self.position.copy()
+        if key_handler[key.UP]:
+            self.acceleration.x += self.engine_power
+        if key_handler[key.DOWN]:
+            self.acceleration.x += self.braking
 
-        self.rear_wheel.x = self.rear_wheel.x - self.rear_wheel.x * (self.wheel_base / 2)
-        self.front_wheel.x = self.front_wheel.x + self.front_wheel.x * (self.wheel_base / 2)
-        self.rear_wheel += self.velocity * dt
-        self.front_wheel += self.velocity.rotate(self.velocity.rotation()) * dt
-        self.new_heading = (self.front_wheel - self.rear_wheel).normalize()
-        print(f"New heading: {self.new_heading}")
-        print(f"Velocity normalized: {self.velocity.normalize(in_place=False)}")
-        self.d = self.new_heading.dot(self.velocity.normalize(in_place=False))
-        print(f"Self d: {self.d}")
-        if self.d > 0:
-            self.velocity += self.acceleration * dt
-        if self.d < 0:
-            self.velocity -= self.acceleration * dt
+    def calculate_steering(self, dt):
+        rear_wheel = self.position
+        front_wheel = self.position
 
-        self.velocity.limit(100)
+        print(f"Front Wheel: {front_wheel}")
+        print(f"Rear Wheel: {rear_wheel}")
+        print(f"Wheel_base: {self.wheel_base/2}")
+
+        rear_wheel.x = rear_wheel.x - self.wheel_base/2
+        front_wheel.x = front_wheel.x + self.wheel_base/2
+        rear_wheel += self.velocity * dt
+
         print(f"Velocity: {self.velocity}")
-        print(f"PositionBefore: {self.position}")
-        self.position += self.velocity * dt
-        print(f"PositionAfter: {self.position}")
-        self.rotation = self.new_heading.rotation()
+        print(f"Velocity rotate: {self.velocity.rotate(self.steer_direction)}")
+        front_wheel += self.velocity.rotate(self.steer_direction) * dt
+
+        print(f"Front Wheel: {front_wheel}")
+        print(f"Rear Wheel: {rear_wheel}")
+
+        new_heading = (front_wheel - rear_wheel).normalize() 
+
+        print(f"New Heading: {new_heading}")
+
+        traction = self.traction_slow
+        if abs(self.velocity) > self.slip_speed:
+            traction = self.traction_fast
+        d = new_heading.dot(self.velocity.normalize(in_place=False))
+        if d > 0:
+            self.velocity = self.velocity.linear_interpolate(new_heading * abs(self.velocity), traction)
+        if d < 0:
+            self.velocity = -new_heading * min(abs(self.velocity), self.max_speed_reverse)
+
+        print(f"Rotation1: {self.rotation}")
+        print(f"Heading Rotation: {new_heading.rotation()}")
+
+        self.rotation = new_heading.rotation()
+
+        print(f"Rotation2: {self.rotation}")
         print(" ")
 
-    def drive(self):
-        self.test = 0
+
+
+
+
+
+
+    # def _physics_process(self, dt, key, key_handler):
+    #     # self.acceleration = Vector2.ZERO
+    #     self.get_input(key, key_handler)
+    #     # self.apply_friction()
+    #     self.calculate_steering(dt)
+    #     self.velocity += acceleration * dt
+    #     # self.velocity = move_and_slide(self.velocity)
+        
+    # def apply_friction():
+    #     if self.velocity.length() < 5:
+    #         # self.velocity = Vector2.ZERO
+    #     friction_force = self.velocity * self.friction
+    #     drag_force = self.velocity * self.velocity.length() * self.drag
+    #     self.acceleration += drag_force + friction_force
+
+    # def get_input(self, key, key_handler):
+    #     turn = 0
+    #     if key_handler[key.LEFT]:
+    #         turn -= 1
+    #     if key_handler[key.RIGHT]:
+    #         turn += 1
+
+    #     self.steer_direction = turn * self.steering_angle
+
+    #     if key_handler[key.UP]:
+    #     #     self.acceleration = transform.x * self.engine_power
+    #     if key_handler[key.DOWN]:
+    #     #     self.acceleration = transform.x * self.braking
+
+    # def calculate_steering(self, dt):
+    #     # rear_wheel = self.position - transform.x * self.wheel_base/2
+    #     # front_wheel = self.position + transform.x * self.wheel_base/2
+    #     rear_wheel += self.velocity * dt
+    #     front_wheel += self.velocity.rotate(self.steer_direction) * dt
+    #     new_heading = (front_wheel - rear_wheel).normalize()
+    #     traction = self.traction_slow
+    #     if self.velocity.length() > self.slip_speed:
+    #         traction = self.traction_fast
+    #     d = new_heading.dot(self.velocity.normalize(in_place=False))
+    #     if d > 0:
+    #         # self.velocity = self.velocity.linear_interpolate(new_heading * self.velocity.length(), traction)
+    #     if d < 0:
+    #         # self.velocity = -new_heading * min(self.velocity.length(), self.max_speed_reverse)
+    #     self.rotation = new_heading.rotation()

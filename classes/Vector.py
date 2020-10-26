@@ -177,6 +177,11 @@ class Vector2D:
     def copy(self):
         return Vector2D(self.x, self.y)
 
+    def linear_interpolate(self, B, T):
+        interpolation = self * (1-T) + B * T
+        return interpolation
+
+
 ### Testing###
 if __name__ == "__main__":
     # v1 = Vector2D(-1,-1)
@@ -204,5 +209,5 @@ if __name__ == "__main__":
     d = v2.dot(v3.normalize(in_place=False))
     print(d)
 
-    v5 = Vector2D(5,5)
+    v5 = Vector2D(5.91,0.01)
     print(v5.rotate(90))

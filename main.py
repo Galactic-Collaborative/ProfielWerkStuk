@@ -1,11 +1,11 @@
 import pyglet
-from classes.car import Car
+from classes.car2 import Car
 
 ### MAIN LOOP
 # config = pyglet.gl.Config(sample_buffers=1, samples=4)
 window = pyglet.window.Window(resizable=True, fullscreen=True) 
 
-car = Car(100,100)
+car = Car(200,200)
 batch = pyglet.graphics.Batch()
 running = True
 

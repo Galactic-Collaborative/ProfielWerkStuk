@@ -1,4 +1,5 @@
 import pyglet
+import math
 from classes.Vector import Vector2D
 
 class Car():
@@ -8,13 +9,12 @@ class Car():
         self.velocity = Vector2D(0,0)
         self.mass = 1
         self.rotation = 0
+        self.carRotation = Vector2D(0,0)
         self.reverse = False
-        self.down = False
+        self.reverse2 = False
 
     def draw(self, batch):
         car = self.drawCar(batch)
-        label = pyglet.text.Label(str(self.reverse), font_name='Times New Roman', font_size=36, x=80, y=1000, anchor_x='center', anchor_y='center')
-        label.draw()
         return car
 
     def drawCar(self, batch):
@@ -22,52 +22,77 @@ class Car():
         car.scale = 0.5
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
-        # car.rotation = -(self.velocity.rotation())
         car.rotation = -(self.rotation)
         return car
 
-    def updateRotation(self):
-        if self.reverse == False:
-            self.rotation = self.velocity.rotation()
+    def forward(self, forces):
+        forces += Vector2D(100,0)
+        self.reverse = False
+
+    def backward(self, forces):
+        forces += Vector2D(-100,0)
+        self.reverse = True
+
+    def left(self, forces, sidewayForce):
+        forces += Vector2D(0,sidewayForce)
+
+    def right(self, forces, sidewayForce):
+        forces += Vector2D(0,-sidewayForce)
+
+    def brake(self, forces):
+        if self.reverse == False and (self.velocity.x > 2 or self.velocity.x < -2):
+            forces += Vector2D(-150, 0)
+        elif self.reverse == True and (self.velocity.x > 2 or self.velocity.x < -2):
+            forces += Vector2D(150, 0)
         else:
-            self.rotation = 180 - self.velocity.rotation()
+            self.velocity.limit(0)
 
     def update(self, dt, key, key_handler):
         forces = Vector2D(0,0)
+
+        if self.velocity.x != 0:
+            c = 100
+            sigmoid = lambda x : 1 / (1 + math.e**-(x-c))
+
+            sidewayForce = sigmoid(abs(self.velocity)) * 400
+        else:
+            sidewayForce = 0
+
         if key_handler[key.UP]:
-            if self.reverse == False:
-                forces += Vector2D(100,0)
-            else:
-                forces += Vector2D(-100,0)
+            self.forward(forces)
         if key_handler[key.DOWN]:
-            self.down = True
-        else: 
-            self.down = False
-        #     forces += Vector2D(-50,0)
-        #     self.reverse = not self.reverse
+            self.backward(forces)
         if key_handler[key.LEFT]:
-            forces += Vector2D(0,100)
-            # self.updateRotation()
+            self.left(forces, sidewayForce)
         if key_handler[key.RIGHT]:
-            forces += Vector2D(0,-100)
-            # self.updateRotation()
+            self.right(forces, sidewayForce)
         if key_handler[key.SPACE]:
-            if self.velocity.x > 2:
-                forces += Vector2D(-150, 0)
-            elif self.velocity.x < -2:
-                forces += Vector2D(-150, 0)
-            # else:
-            #     self.velocity.limit(0)
+            self.brake(forces)
 
-        if self.down == True:
-            self.reverse = not self.reverse
-
-        self.updateRotation()
-        self.acceleration = forces.rotate(self.velocity.rotation()) / self.mass
+        velocityPrevious = self.velocity.copy()
+        self.acceleration = forces.rotate(self.carRotation.rotation()) / self.mass
         self.acceleration.limit(100)
         self.velocity += self.acceleration * dt
-        self.velocity.limit(100)
-        self.position += self.velocity * dt
+        self.velocity.limit(200)
+        if self.velocity.x != 0:
+            self.carRotation = self.velocity.copy()
+            self.carRotation.normalize()   
 
+        if self.reverse == True:
+            if (self.velocity.x < 0 and velocityPrevious.x >= 0) or (self.velocity.x >= 0 and velocityPrevious.x < 0):
+                self.reverse2 = True
+        else:
+            if (self.velocity.x < 0 and velocityPrevious.x >= 0) or (self.velocity.x >= 0 and velocityPrevious.x < 0):
+                self.reverse2 = False
+
+        if self.reverse2 == False:
+            self.position += self.carRotation * abs(self.velocity) * dt
+            self.rotation = self.carRotation.rotation()
+        else:
+            self.carRotation.rotate(180)
+            self.velocity.limit(100)
+            self.position += self.carRotation * -abs(self.velocity) * dt
+            self.rotation = self.carRotation.rotation()
+        
     def drive(self):
         self.test = 0

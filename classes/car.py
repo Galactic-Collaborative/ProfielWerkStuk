@@ -8,6 +8,7 @@ class Car():
         self.velocity = Vector2D(0,0)
         self.mass = 1
         self.rotation = 0
+        self.carRotation = Vector2D(0,0)
 
     def draw(self, batch):
         car = self.drawCar(batch)
@@ -37,15 +38,19 @@ class Car():
                 forces += Vector2D(-150, 0)
             elif self.velocity.x < -2:
                 forces += Vector2D(-150, 0)
-            # else:
-            #     self.velocity.limit(0)
-
-        self.acceleration = forces.rotate(self.velocity.rotation()) / self.mass
+            else:
+                self.velocity.limit(0)
+        
+        self.acceleration = forces.rotate(self.carRotation.rotation()) / self.mass
         self.acceleration.limit(100)
         self.velocity += self.acceleration * dt
-        self.velocity.limit(100)
-        self.position += self.velocity * dt
-        self.rotation = self.velocity.rotation()
+        self.velocity.limit(200)
+        if self.velocity.x > 2 or self.velocity.x < -2:
+            self.carRotation = self.velocity.copy()
+            self.carRotation.normalize()
+        self.position += self.carRotation * abs(self.velocity) * dt
+        self.rotation = self.carRotation.rotation()
+        
 
     def drive(self):
         self.test = 0

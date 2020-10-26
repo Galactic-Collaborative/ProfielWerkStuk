@@ -156,19 +156,6 @@ class Vector2D:
         
         return self
 
-    def rotate(self, rotation):
-        """Rotate the vector
-        The vector is rotated by the given rotation.
-        Args: rotation - `float | int` rotation in degrees
-        """
-        rotation = math.radians(rotation)
-        x2 = math.cos(rotation) * self.x - math.sin(rotation) * self.y
-        y2 = math.sin(rotation) * self.x + math.cos(rotation) * self.y
-        self.x = x2
-        self.y = y2
-
-        return self
-
     def normalize(self, in_place=True):
         """Normalize the vector
         Args: 

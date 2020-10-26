@@ -127,6 +127,21 @@ class Vector2D:
         else:
             return angle
 
+    def rotate(self, rotation):
+        """Rotate the vector
+
+        The vector is rotated by the given rotation.
+
+        Args: rotation - `float | int` rotation in degrees
+        """
+        rotation = math.radians(rotation)
+        x2 = math.cos(rotation)  * self.x - math.sin(rotation) * self.y
+        y2 = math.sin(rotation)  * self.x + math.cos(rotation) * self.y
+        self.x = x2
+        self.y = y2
+
+        return self
+
     
     def limit(self, limit):
         """Limit the length of the vector
@@ -137,7 +152,7 @@ class Vector2D:
             angle = self.rotation(degrees=False)
             x = math.cos(angle) * limit
             y = math.sin(angle) * limit
-            self.x, self.y = round(x, 2), round(y, 2)
+            self.x, self.y = x, y
         
         return self
 

@@ -127,7 +127,7 @@ class Vector2D:
         else:
             return angle
 
-    def rotate(self, rotation):
+    def rotate(self, rotation, in_place=True):
         """Rotate the vector
 
         The vector is rotated by the given rotation.
@@ -137,10 +137,12 @@ class Vector2D:
         rotation = math.radians(rotation)
         x2 = math.cos(rotation)  * self.x - math.sin(rotation) * self.y
         y2 = math.sin(rotation)  * self.x + math.cos(rotation) * self.y
-        self.x = x2
-        self.y = y2
-
-        return self
+        if in_place:
+            self.x = x2
+            self.y = y2
+            return self
+        else:
+            return Vector2D(x2,y2)
 
     
     def limit(self, limit):
@@ -156,18 +158,8 @@ class Vector2D:
         
         return self
 
-    def rotate(self, rotation):
-        """Rotate the vector
-        The vector is rotated by the given rotation.
-        Args: rotation - `float | int` rotation in degrees
-        """
-        rotation = math.radians(rotation)
-        x2 = math.cos(rotation) * self.x - math.sin(rotation) * self.y
-        y2 = math.sin(rotation) * self.x + math.cos(rotation) * self.y
-        self.x = x2
-        self.y = y2
-
-        return self
+    def linear_interpolate(self, b, t):
+        return self + (b - self) * t
 
     def normalize(self, in_place=True):
         """Normalize the vector

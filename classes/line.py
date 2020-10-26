@@ -11,10 +11,12 @@ class linline:
     The linear line is a simplified version of the polynomial line 'polyline'.
     
     """
-    def __init__(self, rc: float, b: float, limit=[-math.inf,math.inf]) -> None:
+    def __init__(self, rc: float, b: float, limit=[-math.inf,math.inf], vertical=False, color=(255,255,255)) -> None:
         self.rc = float(rc)
         self.b = float(b)
         self.limit = limit
+        self.vertical = vertical
+        self.color = color
     
     @classmethod
     def fromString(cls, string: str, variable="x") -> linline:
@@ -53,10 +55,22 @@ class linline:
         if(type(b) == tuple):
             b = Vector2D.fromTuple(b)
         
-        rc = (b.y - a.y)/(b.x - a.x)
-        p = a.y - rc * a.x
-        limit = [a.x, b.x]
+        if (not a.y == b.y) and (not a.x == b.x):
+            rc = (b.y - a.y)/(b.x - a.x)
+            p = a.y - rc * a.x
+        elif (a.y == b.y):
+            rc = 0;
+            p = a.y;
+        else:
+            rc = 1e10
+            p = -a.x*1e10
 
+            limit = [a.x, b.x]
+            line = cls(rc, p, sorted(limit))
+            line.vertical = [a.y, b.y]
+            return line
+
+        limit = [a.x, b.x]
         return cls(rc, p, sorted(limit))
 
     def intersect(self, other: linline) -> Vector2D:
@@ -120,14 +134,17 @@ class linline:
             new_limit = self.limit
         
         pos = new_limit
-        line = pyglet.shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[0]), width=1, color=(255,255,255), batch=batch)
+        if not (self.vertical):
+            line = pyglet.shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[1]), width=10, color=self.color, batch=batch)
+        else:
+            line = pyglet.shapes.Line(pos[0], self.vertical[0], pos[1], self.vertical[1], width=10, color=self.color, batch=batch)
         return line
 
     def __str__(self):
         return f"Linear Line: {self.rc}x + {self.b} -> Limit: {self.limit}"
     
     def __repr__(self):
-        return f"linline({self.rc}x + {self.b}, limit={self.limit})"
+        return f"linline({self.rc}x + {self.b}, limit={self.limit}, vertical={self.vertical})"
 
 if __name__ == "__main__":
     l1 = linline(1,2, [1,3])

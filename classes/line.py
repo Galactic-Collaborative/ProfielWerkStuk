@@ -1,4 +1,4 @@
-from Vector import Vector2D
+from classes.Vector import Vector2D
 from typing import NewType, Union
 import math
 import pyglet
@@ -59,8 +59,8 @@ class linline:
             rc = (b.y - a.y)/(b.x - a.x)
             p = a.y - rc * a.x
         elif (a.y == b.y):
-            rc = 0;
-            p = a.y;
+            rc = 0
+            p = a.y
         else:
             rc = 1e10
             p = -a.x*1e10
@@ -118,7 +118,7 @@ class linline:
         """
 
         if self.limit == [-math.inf,math.inf] and self.rc != 0:
-            new_limit = [0,screen[0]];
+            new_limit = [0,screen[0]]
             if not (0<=self.calc(0)<=screen[1]):
                 if(self.rc > 0):
                     new_limit[0] = 0

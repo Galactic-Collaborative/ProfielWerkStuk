@@ -1,5 +1,5 @@
 import pyglet
-from classes.car5 import Car
+from classes.car2 import Car
 
 ### MAIN LOOP
 # config = pyglet.gl.Config(sample_buffers=1, samples=4)
@@ -24,7 +24,7 @@ def on_draw():
 def update(dt):
     window.push_handlers(key_handler)
     if(running):
-        car.update(dt, key, key_handler)
+        car.update(dt, key, key_handler, batch)
     else:
         pyglet.app.exit()
 

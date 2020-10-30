@@ -1,5 +1,6 @@
 import pyglet
 import math
+from classes.line import linline
 from classes.Vector import Vector2D
 
 class Car():
@@ -47,7 +48,12 @@ class Car():
         else:
             self.velocity.limit(0)
 
-    def update(self, dt, key, key_handler):
+    def eyes(self, batch):
+        middle = self.position
+        l1 = linline(1,2, [1,3])
+        l1.draw(batch)
+
+    def update(self, dt, key, key_handler, batch):
         forces = Vector2D(0,0)
 
         if self.velocity.x != 0:
@@ -93,6 +99,8 @@ class Car():
             self.velocity.limit(100)
             self.position += self.carRotation * -abs(self.velocity) * dt
             self.rotation = self.carRotation.rotation()
+        
+        self.eyes(batch)
         
     def drive(self):
         self.test = 0

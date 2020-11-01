@@ -158,9 +158,6 @@ class Vector2D:
         
         return self
 
-    def linear_interpolate(self, b, t):
-        return self + (b - self) * t
-
     def normalize(self, in_place=True):
         """Normalize the vector
         Args: 

@@ -15,6 +15,10 @@ class Car():
         self.reverse = False
         self.reverse2 = False
         self.eyesList = [[0, 200], [200, 200], [200, 0], [200, -200], [0, -200], [-200, 0]]
+        self.hitboxVectors = [[3, 3], [35, 3], [35, 25], [3, 25]]
+        self.dead = False
+        self.lines = []
+        self.middle = Vector2D(0,0)
 
     def draw(self, batch):
         car = self.drawCar(batch)
@@ -22,7 +26,7 @@ class Car():
 
     def drawCar(self, batch):
         car = pyglet.sprite.Sprite(pyglet.resource.image('img/car.png'), x=self.position.x, y=self.position.y, batch=batch)
-        car.scale = 0.5
+        car.scale = 0.15
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
         car.rotation = -(self.rotation)
@@ -45,9 +49,51 @@ class Car():
         eyePoints = [Vector2D(i[0],i[1]) for i in self.eyesList]
 
         for line in eyePoints:
-            secondLine = self.position + line.rotate(self.rotation)
-            lines.append(linline.fromPoints(self.position, secondLine))
+            secondPosition = self.middle + line.rotate(self.rotation)
+            lines.append(linline.fromPoints(self.middle, secondPosition))
+
+        self.lines = lines
         return lines
+
+    def hitbox(self, batch):
+        hitboxVectors = self.generateHitbox()
+        out = []
+
+        for hitboxLine in hitboxVectors:
+            out.append(hitboxLine.draw(batch))
+        return out
+
+    def generateHitbox(self):
+        hitbox = []
+        hitboxVectors = [Vector2D(i[0],i[1]) for i in self.hitboxVectors]
+        previousPoint = self.position + Vector2D(5, 5)
+        lineColor = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
+
+        for i in range(len(hitboxVectors)):
+            j = (i+1)%len(hitboxVectors)
+            nextPoint = self.position + hitboxVectors[j].rotate(self.rotation)
+            l = linline.fromPoints(previousPoint, nextPoint)
+            l.color = lineColor[i]
+            hitbox.append(l)
+            previousPoint = nextPoint
+
+        return hitbox
+
+    def intersectEyes(self, batch, lines):
+        dots = []
+
+        for eyeline in self.lines:
+            intersect = []
+            for laneline in lines:
+                intersect.append(laneline.intersect(eyeline))
+
+            minList = [abs(self.middle - point) for point in intersect if point != None]
+            if len(minList):
+                pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
+                point = [i for i in intersect if i != None][pointIndex[0]]
+                dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch))
+
+        return dots
 
     def forward(self, forces):
         forces += Vector2D(100,0)
@@ -71,13 +117,9 @@ class Car():
         else:
             self.velocity.limit(0)
 
-    def eyes(self, batch):
-        middle = self.position
-        l1 = linline(1,2, [1,3])
-        l1.draw(batch)
-
-    def update(self, dt, key, key_handler, batch):
+    def update(self, dt, key, key_handler):
         forces = Vector2D(0,0)
+        # self.intersection(lines)
 
         if self.velocity.x != 0:
             c = 100
@@ -105,7 +147,7 @@ class Car():
         self.velocity.limit(200)
         if self.velocity.x != 0:
             self.carRotation = self.velocity.copy()
-            self.carRotation.normalize()   
+            self.carRotation.normalize()
 
         if self.reverse == True:
             if (self.velocity.x < 0 and velocityPrevious.x >= 0) or (self.velocity.x >= 0 and velocityPrevious.x < 0):
@@ -122,8 +164,7 @@ class Car():
             self.velocity.limit(100)
             self.position += self.carRotation * -abs(self.velocity) * dt
             self.rotation = self.carRotation.rotation()
-        
-        self.eyes(batch)
-        
+        self.middle = self.position + Vector2D(25, 15).rotate(self.rotation)
+
     def drive(self):
         self.test = 0

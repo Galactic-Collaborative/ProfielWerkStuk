@@ -13,7 +13,7 @@ inner = [Vector2D(i[0],i[1]) for i in inner_points]
 outer_points = [[18,0],[8,0],[2,3],[0,9],[0,14],[2,16],[5,16],[8,12],[9,9],[12,8],[15,8],[17,10],[16,11],[12,10],[11,11],[10,13],[10,15],[12,17],[17,17],[20,16],[23,14],[25,8],[23,4]]
 outer = [Vector2D(i[0],i[1]) for i in outer_points]
 
-car = Car(200,200)
+car = Car(300,200)
 circ = circuit.fromFullPoints([inner, outer])
 
 batch = pyglet.graphics.Batch()
@@ -34,7 +34,10 @@ def on_draw():
 def update(dt):
     window.push_handlers(key_handler)
     if(running):
-        car.update(dt, key, key_handler, batch)
+        car.update(dt, key, key_handler)
+        hitbox = car.generateHitbox()
+        if circ.intersectBorder(hitbox) == True:
+            print("Game over")
     else:
         pyglet.app.exit()
 
@@ -43,6 +46,8 @@ def render():
     _ = car.draw(batch)
     a = car.eyes(batch)
     b = circ.draw(batch, window.get_size())
+    c = car.hitbox(batch)
+    d = car.intersectEyes(batch, circ.vertices)
     batch.draw()
 
 if __name__ == "__main__":

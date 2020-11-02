@@ -86,9 +86,12 @@ class linline:
         `Vector2D` A vector if a match is found \n
         `None` None if no match is found
         """
-        new_x = (other.b - self.b) / (self.rc - other.rc)
-        if self.limit[0] <= new_x <= self.limit[1] and other.limit[0] <= new_x <= other.limit[1]: 
-            return Vector2D(new_x, self.calc(new_x))
+        if (self.rc - other.rc) != 0:
+            new_x = (other.b - self.b) / (self.rc - other.rc)
+            if self.limit[0] <= new_x <= self.limit[1] and other.limit[0] <= new_x <= other.limit[1]: 
+                return Vector2D(new_x, self.calc(new_x))
+            else:
+                return None
         else:
             return None
 

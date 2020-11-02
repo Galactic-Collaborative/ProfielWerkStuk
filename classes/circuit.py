@@ -26,8 +26,11 @@ class circuit():
         
         return cls(lines)
 
-    def intersect(self, line):
-        pass
+    def intersectBorder(self, hitbox):
+        for line in self.vertices:
+            for hitboxLine in hitbox:
+                if line.intersect(hitboxLine) != None:
+                    return True
 
     def draw(self, batch, screen):
         out = []

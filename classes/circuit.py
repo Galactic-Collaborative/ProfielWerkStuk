@@ -32,10 +32,10 @@ class circuit():
                 if line.intersect(hitboxLine) != None:
                     return True
 
-    def draw(self, batch, screen):
+    def draw(self, batch, screen, group):
         out = []
         for line in self.vertices:
-            out.append(line.draw(batch, screen))
+            out.append(line.draw(batch, group, screen))
 
         return out
 

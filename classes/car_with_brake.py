@@ -20,28 +20,31 @@ class Car():
         self.lines = []
         self.middle = Vector2D(0,0)
 
-    def draw(self, batch):
-        car = self.drawCar(batch)
+    def draw(self, batch, group):
+        car = self.drawCar(batch, group)
         return car
 
-    def drawCar(self, batch):
-        car = pyglet.sprite.Sprite(pyglet.resource.image('img/car.png'), x=self.position.x, y=self.position.y, batch=batch)
+    def drawCar(self, batch, group):
+        if not self.dead:
+            car = pyglet.sprite.Sprite(pyglet.resource.image('img/car.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
+        else:
+            car = pyglet.sprite.Sprite(pyglet.resource.image('img/car2.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
         car.scale = 0.15
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
         car.rotation = -(self.rotation)
         return car
 
-    def eyes(self, batch):
-        eyes = self.drawEyes(batch)
+    def eyes(self, batch, group):
+        eyes = self.drawEyes(batch, group)
         return eyes
 
-    def drawEyes(self, batch):
+    def drawEyes(self, batch, group):
         lines = self.generateLines()
         out = []
 
         for line in lines:
-            out.append(line.draw(batch))
+            out.append(line.draw(batch, group, [1920, 1080], 5))
         return out
 
     def generateLines(self):
@@ -55,12 +58,12 @@ class Car():
         self.lines = lines
         return lines
 
-    def hitbox(self, batch):
+    def hitbox(self, batch, group):
         hitboxVectors = self.generateHitbox()
         out = []
 
         for hitboxLine in hitboxVectors:
-            out.append(hitboxLine.draw(batch))
+            out.append(hitboxLine.draw(batch, group))
         return out
 
     def generateHitbox(self):
@@ -79,7 +82,7 @@ class Car():
 
         return hitbox
 
-    def intersectEyes(self, batch, lines):
+    def intersectEyes(self, batch, lines, group):
         dots = []
 
         for eyeline in self.lines:
@@ -91,7 +94,7 @@ class Car():
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 point = [i for i in intersect if i != None][pointIndex[0]]
-                dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch))
+                dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
 
         return dots
 
@@ -110,12 +113,13 @@ class Car():
         forces += Vector2D(0,-sidewayForce)
 
     def brake(self, forces):
-        if self.reverse == False and (self.velocity.x > 2 or self.velocity.x < -2):
+        if self.reverse2 == False and (self.velocity.x > 2 or self.velocity.x < -2):
             forces += Vector2D(-150, 0)
-        elif self.reverse == True and (self.velocity.x > 2 or self.velocity.x < -2):
+        elif self.reverse2 == True and (self.velocity.x > 2 or self.velocity.x < -2):
             forces += Vector2D(150, 0)
         else:
             self.velocity.limit(0)
+            self.reverse2 = False
 
     def update(self, dt, key, key_handler):
         forces = Vector2D(0,0)

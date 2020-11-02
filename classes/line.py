@@ -110,7 +110,7 @@ class linline:
 
         return self.rc * x + self.b
     
-    def draw(self, batch, screen=[1920,1080]):
+    def draw(self, batch, group, screen=[1920,1080], width=10):
         """Draw the line on the screen
 
         If the line is limited, it will draw the limited line in its whole.
@@ -138,9 +138,9 @@ class linline:
         
         pos = new_limit
         if not (self.vertical):
-            line = pyglet.shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[1]), width=10, color=self.color, batch=batch)
+            line = pyglet.shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[1]), width=width, color=self.color, batch=batch, group=group)
         else:
-            line = pyglet.shapes.Line(pos[0], self.vertical[0], pos[1], self.vertical[1], width=10, color=self.color, batch=batch)
+            line = pyglet.shapes.Line(pos[0], self.vertical[0], pos[1], self.vertical[1], width=width, color=self.color, batch=batch, group=group)
         return line
 
     def __str__(self):

@@ -1,5 +1,5 @@
 import pyglet
-from classes.car2 import Car
+from classes.car import Car
 from classes.circuit import circuit
 from classes.Vector import Vector2D
 
@@ -37,17 +37,21 @@ def update(dt):
         car.update(dt, key, key_handler)
         hitbox = car.generateHitbox()
         if circ.intersectBorder(hitbox) == True:
-            print("Game over")
+            car.dead = True
     else:
         pyglet.app.exit()
 
 def render():
     window.clear()
-    _ = car.draw(batch)
-    a = car.eyes(batch)
-    b = circ.draw(batch, window.get_size())
-    c = car.hitbox(batch)
-    d = car.intersectEyes(batch, circ.vertices)
+    foreground = pyglet.graphics.OrderedGroup(2)
+    background = pyglet.graphics.OrderedGroup(1)
+    circuitLayer = pyglet.graphics.OrderedGroup(0)
+
+    _ = car.draw(batch, foreground)
+    a = car.eyes(batch, background)
+    b = circ.draw(batch, window.get_size(), circuitLayer)
+    c = car.hitbox(batch, background)
+    d = car.intersectEyes(batch, circ.vertices, background)
     batch.draw()
 
 if __name__ == "__main__":

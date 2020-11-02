@@ -28,8 +28,8 @@ class Car():
         if not self.dead:
             car = pyglet.sprite.Sprite(pyglet.resource.image('img/car.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
         else:
-            car = pyglet.sprite.Sprite(pyglet.resource.image('img/car2.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
-        car.scale = 0.15
+            car = pyglet.sprite.Sprite(pyglet.resource.image('img/carCrash.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
+        car.scale = 1
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
         car.rotation = -(self.rotation)

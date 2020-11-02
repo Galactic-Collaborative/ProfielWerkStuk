@@ -48,9 +48,6 @@ class circuit():
             j = (i+1)%len(points)
             lines.append(linline.fromPoints(points[i],points[j]))
 
-        self.lines = lines
-        print(lines)
-
         #Create paralel lines
         plines = lines[:]
         for line in lines:

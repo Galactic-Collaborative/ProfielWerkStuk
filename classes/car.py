@@ -15,7 +15,7 @@ class Car():
         self.reverse = False
         self.reverse2 = False
         self.eyesList = [[0, 200], [200, 200], [200, 0], [200, -200], [0, -200], [-200, 0]]
-        self.hitboxVectors = [[3, 3], [35, 3], [35, 25], [3, 25]]
+        self.hitboxVectors = [[3, 3], [33, 3], [33, 23], [3, 23]]
         self.dead = False
         self.lines = []
         self.middle = Vector2D(0,0)
@@ -29,7 +29,7 @@ class Car():
             car = pyglet.sprite.Sprite(pyglet.resource.image('img/car.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
         else:
             car = pyglet.sprite.Sprite(pyglet.resource.image('img/carCrash.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
-        car.scale = 1
+        car.scale = 1.48
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
         car.rotation = -(self.rotation)

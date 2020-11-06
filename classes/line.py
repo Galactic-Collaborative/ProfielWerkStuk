@@ -1,7 +1,7 @@
 from classes.Vector import Vector2D
 from typing import NewType, Union
 import math
-import pyglet
+from pyglet import shapes
 
 linline = NewType("linline", object)
 
@@ -138,9 +138,9 @@ class linline:
         
         pos = new_limit
         if not (self.vertical):
-            line = pyglet.shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[1]), width=width, color=self.color, batch=batch, group=group)
+            line = shapes.Line(pos[0], self.calc(pos[0]), pos[1], self.calc(pos[1]), width=width, color=self.color, batch=batch, group=group)
         else:
-            line = pyglet.shapes.Line(pos[0], self.vertical[0], pos[1], self.vertical[1], width=width, color=self.color, batch=batch, group=group)
+            line = shapes.Line(pos[0], self.vertical[0], pos[1], self.vertical[1], width=width, color=self.color, batch=batch, group=group)
         return line
 
     def __str__(self):

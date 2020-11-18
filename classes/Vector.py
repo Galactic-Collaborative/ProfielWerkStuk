@@ -98,6 +98,9 @@ class Vector2D:
         """
         return math.sqrt(self.x**2 + self.y**2)
     
+    def __neg__(self):
+        return Vector2D(-self.x, -self.y)
+
     def dot(self, other: Vector2D):
         """Multiply the two vectors using the dot product method
         Multiply two vectors using the dot product.
@@ -188,7 +191,7 @@ if __name__ == "__main__":
     # print(v2.rotation())
 
     v3 = Vector2D(150,125)
-    # v3 += v1
+    v3 = v3 * 0.1
 
     # v4 = Vector2D(0,6)
     # v4.limit(5)

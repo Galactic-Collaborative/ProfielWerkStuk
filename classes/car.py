@@ -6,19 +6,27 @@ from classes.line import linline
 
 class Car():
     def __init__(self, x: int, y: int):
-        self.position = Vector2D(x, y)
+        self.mass = 1
+        self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)
         self.velocity = Vector2D(0,0)
-        self.mass = 1
-        self.rotation = 0
-        self.carRotation = Vector2D(0,0)
+        self.position = Vector2D(x, y)
+
+        self.sprites = {"alive": pyglet.resource.image('img/car.png'),"dead": pyglet.resource.image('img/carCrash.png')}
+        self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
+        self.scale = 1.48
+
+        self.carRotation = Vector2D(1,0)
+
         self.reverse = False
         self.reverse2 = False
+
         self.eyesList = [[0, 200], [200, 200], [200, 0], [200, -200], [0, -200], [-200, 0]]
         self.hitboxVectors = [[3, 3], [33, 3], [33, 23], [3, 23]]
         self.dead = False
-        self.lines = []
         self.middle = Vector2D(0,0)
+        
+        self.lines = []
 
     def draw(self, batch, group):
         car = self.drawCar(batch, group)
@@ -26,13 +34,13 @@ class Car():
 
     def drawCar(self, batch, group):
         if not self.dead:
-            car = pyglet.sprite.Sprite(pyglet.resource.image('img/car.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
+            car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
         else:
-            car = pyglet.sprite.Sprite(pyglet.resource.image('img/carCrash.png'), x=self.position.x, y=self.position.y, batch=batch, group=group)
-        car.scale = 1.50
+            car = pyglet.sprite.Sprite(self.sprites['dead'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+        car.scale = self.scale
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
-        car.rotation = -(self.rotation)
+        car.rotation = -(self.carRotation.rotation())
         return car
 
     def eyes(self, batch, group):
@@ -52,7 +60,7 @@ class Car():
         eyePoints = [Vector2D(i[0],i[1]) for i in self.eyesList]
 
         for line in eyePoints:
-            secondPosition = self.middle + line.rotate(self.rotation)
+            secondPosition = self.middle + line.rotate(self.carRotation.rotation())
             lines.append(linline.fromPoints(self.middle, secondPosition))
 
         self.lines = lines
@@ -74,7 +82,7 @@ class Car():
 
         for i in range(len(hitboxVectors)):
             j = (i+1)%len(hitboxVectors)
-            nextPoint = self.position + hitboxVectors[j].rotate(self.rotation)
+            nextPoint = self.position + hitboxVectors[j].rotate(self.carRotation.rotation())
             l = linline.fromPoints(previousPoint, nextPoint)
             l.color = lineColor[i]
             hitbox.append(l)
@@ -86,57 +94,76 @@ class Car():
         dots = []
 
         for eyeline in self.lines:
-            intersect = []
-            for laneline in lines:
-                intersect.append(laneline.intersect(eyeline))
-
-            minList = [abs(self.middle - point) for point in intersect if point != None]
+            intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
+            minList = [abs(self.middle - point) for point in intersect]
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
-                point = [i for i in intersect if i != None][pointIndex[0]]
+                point = intersect[pointIndex[0]]
                 dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
-
         return dots
 
-    def forward(self, forces):
-        forces += Vector2D(100,0)
-        self.reverse = False
+    def forward(self):
+        self.forces += Vector2D(100,0)
+        #self.reverse = False
 
-    def backward(self, forces):
-        forces += Vector2D(-100,0)
-        self.reverse = True
+    def backward(self):
+        self.forces += Vector2D(-100,0)
+        #self.reverse = True
 
-    def left(self, forces, sidewayForce):
-        forces += Vector2D(0,sidewayForce)
+    def left(self):
+        self.forces += Vector2D(0, self._getTurnForce())
 
-    def right(self, forces, sidewayForce):
-        forces += Vector2D(0,-sidewayForce)
+    def right(self):
+        self.forces += Vector2D(0,-self._getTurnForce())
 
     def update(self, dt, key, key_handler):
-        forces = Vector2D(0,0)
-
-        if self.velocity.x != 0:
-            c = 100
-            sigmoid = lambda x : 1 / (1 + math.e**-(x-c))
-
-            sidewayForce = sigmoid(abs(self.velocity)) * 400
-        else:
-            sidewayForce = 0
+        self.forces = Vector2D(0,0)
 
         if key_handler[key.UP]:
-            self.forward(forces)
+            self.forward()
         if key_handler[key.DOWN]:
-            self.backward(forces)
+            self.backward()
         if key_handler[key.LEFT]:
-            self.left(forces, sidewayForce)
+            self.left()
         if key_handler[key.RIGHT]:
-            self.right(forces, sidewayForce)
+            self.right()
+        
+        self._calculatePhysics(dt)
 
-        velocityPrevious = self.velocity.copy()
-        self.acceleration = forces.rotate(self.carRotation.rotation()) / self.mass
+    def _getTurnForce(self):
+        if self.velocity.x != 0:
+            c = 10
+            sigmoid = lambda x : 1 / (1 + math.e**-(x-c))
+
+            sidewayForce = 1/sigmoid(abs(self.velocity)) * 40
+        else:
+            sidewayForce = 0
+        #return sidewayForce
+        return 400
+
+    def _calculatePhysics(self, dt):
+        #Calculate acceleration based on forces andl limit it to 100 pixels per second per second
+        self.acceleration = self.forces.rotate(self.carRotation.rotation()) / self.mass
         self.acceleration.limit(100)
+
+        #Calculate velocity based on accelation and limit it to 200 pixels per second
         self.velocity += self.acceleration * dt
         self.velocity.limit(200)
+        
+        #Determine if we are driving backwards or forwards
+        backwards = (self.velocity @ self.carRotation < 0)
+
+        self.position += self.velocity * dt
+        if not backwards:
+            self.carRotation = self.velocity.copy()
+        else:
+            self.carRotation = -self.velocity.copy()
+        
+        self.middle = self.position + Vector2D.fromTuple(self.image_dimensions).rotate(self.carRotation.rotation()) * self.scale * 0.5
+        
+
+
+"""
         if self.velocity.x != 0:
             self.carRotation = self.velocity.copy()
             self.carRotation.normalize()
@@ -150,13 +177,10 @@ class Car():
 
         if self.reverse2 == False:
             self.position += self.carRotation * abs(self.velocity) * dt
-            self.rotation = self.carRotation.rotation()
+            self.carRotation.rotation() = self.carRotation.rotation()
         else:
             self.carRotation.rotate(180)
             self.velocity.limit(100)
             self.position += self.carRotation * -abs(self.velocity) * dt
-            self.rotation = self.carRotation.rotation()
-        self.middle = self.position + Vector2D(20, 15).rotate(self.rotation)
-
-    def drive(self):
-        self.test = 0
+            self.carRotation.rotation() = self.carRotation.rotation()
+        self.middle = self.position + Vector2D(25, 15).rotate(self.carRotation.rotation())"""

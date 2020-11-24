@@ -75,7 +75,7 @@ class circuitEnv(py_environment.PyEnvironment):
         if self.circuit.collidedWithCar(hitbox):
             self._episode_ended = True
             return ts.termination(np.array([]), reward=-2.0)
-        elif self.car.collidedWithCheckpoint(hitbox):
+        elif self.circuit.carCollidedWithCheckpoint(hitbox):
             return ts.transition(self._observe(),reward=3.0, discount=1.0)
         else:
             return ts.transition(self._observe(), reward=1.0, discount=1.0)

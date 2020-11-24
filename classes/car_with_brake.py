@@ -2,7 +2,6 @@ import pyglet
 import math
 from classes.line import linline
 from classes.Vector import Vector2D
-from classes.line import linline
 
 class Car():
     def __init__(self, x: int, y: int):

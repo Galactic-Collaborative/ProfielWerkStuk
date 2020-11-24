@@ -2,7 +2,6 @@ import pyglet
 import math
 from classes.line import linline
 from classes.Vector import Vector2D
-from classes.line import linline
 
 class Car():
     def __init__(self, x: int, y: int):
@@ -11,6 +10,7 @@ class Car():
         self.acceleration = Vector2D(0,0)
         self.velocity = Vector2D(0,0)
         self.position = Vector2D(x, y)
+
 
         self.sprites = {"alive": pyglet.resource.image('img/car.png'),"dead": pyglet.resource.image('img/carCrash.png')}
         self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
@@ -27,6 +27,8 @@ class Car():
         self.middle = Vector2D(0,0)
         
         self.lines = []
+        
+        self.observation = [None] * len(self.eyesList)
 
     def draw(self, batch, group):
         car = self.drawCar(batch, group)
@@ -93,12 +95,14 @@ class Car():
     def intersectEyes(self, batch, lines, group):
         dots = []
 
-        for eyeline in self.lines:
+        for n, eyeline in enumerate(self.lines):
             intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
             minList = [abs(self.middle - point) for point in intersect]
+            self.observation[n] = 1000
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 point = intersect[pointIndex[0]]
+                self.observation[n] = abs(self.middle - point)
                 dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
         return dots
 

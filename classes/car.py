@@ -18,9 +18,6 @@ class Car():
 
         self.carRotation = Vector2D(1,0)
 
-        self.reverse = False
-        self.reverse2 = False
-
         self.eyesList = [[0, 200], [200, 200], [200, 0], [200, -200], [0, -200], [-200, 0]]
         self.hitboxVectors = [[3, 3], [33, 3], [33, 23], [3, 23]]
         self.dead = False

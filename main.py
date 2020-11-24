@@ -20,8 +20,9 @@ for i, checkpoint in enumerate(checkpoints):
     for x, point in enumerate(checkpoint):
         circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
+circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1))
 car = Car(300,200)
-circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints)
+car.position = circ.startingPoint
 
 batch = pyglet.graphics.Batch()
 running = True
@@ -43,6 +44,7 @@ def update(dt):
     if(running):
         car.update(dt, key, key_handler)
         hitbox = car.generateHitbox()
+        circ.carCollidedWithCheckpoint(hitbox)
         if circ.collidedWithCar(hitbox) == True:
             car.dead = True
     else:

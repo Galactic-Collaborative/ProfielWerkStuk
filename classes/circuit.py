@@ -7,21 +7,24 @@ import pyglet
 from typing import List
 
 class circuit():
-    def __init__(self, vertices: List[linline], checkpoints: List[linline]) -> None:
+    def __init__(self, vertices: List[linline], checkpoints: List[linline], startingPoint=Vector2D(0,0)) -> None:
         self.vertices = vertices
         self.checkpoints = checkpoints
 
         self.currentCheckpoint = 0
+
+        self.startingPoint = startingPoint
     
     @classmethod
     def fromSkeletonPoints(cls, points):
         vertices = cls.generate(points, 50)
 
     @classmethod
-    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]]) -> None:
+    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0)) -> None:
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
+        startPoint = startingPoint*60 + margin
         #Create a list of lines from the points
         for lane in points:
             for i in range(len(lane)):
@@ -34,7 +37,7 @@ class circuit():
             checkpoint.append(l)
 
 
-        return cls(lines, checkpoint)
+        return cls(lines, checkpoint, startingPoint=startPoint)
 
     def collidedWithCar(self, hitbox) -> bool:
         for line in self.vertices:
@@ -43,9 +46,11 @@ class circuit():
                     return True
         return False
 
-    def carCollidedWithCheckpoint(self, hitbox) -> bool
-        for hitboxLine in hitbox:
-            if hitboxLine.intersect(hitboxLine) != None:
+    def carCollidedWithCheckpoint(self, hitbox) -> bool:
+        for line in hitbox:
+            print(self.checkpoints[self.currentCheckpoint])
+            if self.checkpoints[self.currentCheckpoint].intersect(line) != None:
+                print('HIT!')
                 self.spawnNextCheckpoint()
                 return True
         return False
@@ -58,8 +63,10 @@ class circuit():
         for line in self.vertices:
             out.append(line.draw(batch, group, screen))
         
-        for line in self.checkpoints:
-            out.append(line.draw(batch, group, screen))
+
+        out.append(self.checkpoints[(self.currentCheckpoint + (len(self.checkpoints) - 1))%len(self.checkpoints)].draw(batch, group, screen))
+        out.append(self.checkpoints[self.currentCheckpoint].draw(batch, group, screen))
+        out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))
 
         return out
 

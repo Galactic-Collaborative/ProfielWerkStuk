@@ -10,6 +10,8 @@ class circuit():
     def __init__(self, vertices: List[linline], checkpoints: List[linline]) -> None:
         self.vertices = vertices
         self.checkpoints = checkpoints
+
+        self.currentCheckpoint = 0
     
     @classmethod
     def fromSkeletonPoints(cls, points):
@@ -40,6 +42,16 @@ class circuit():
                 if line.intersect(hitboxLine) != None:
                     return True
         return False
+
+    def carCollidedWithCheckpoint(self, hitbox) -> bool
+        for hitboxLine in hitbox:
+            if hitboxLine.intersect(hitboxLine) != None:
+                self.spawnNextCheckpoint()
+                return True
+        return False
+
+    def spawnNextCheckpoint(self):
+        self.currentCheckpoint = (self.currentCheckpoint + 1)%len(self.checkpoints)
 
     def draw(self, batch, screen, group):
         out = []

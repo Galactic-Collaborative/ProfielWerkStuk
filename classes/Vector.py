@@ -112,6 +112,13 @@ class Vector2D:
         else:
             raise TypeError(f"Type of other vector is not valid: '{type(other).__name__}' is not a valid Vector2D")
 
+    def toNormalVector(self, in_place=False):
+        if in_place:
+            self.x, self.y = self.y, -self.x
+            return self
+        else:
+            return Vector2D(self.y, -self.x)
+
     def rotation(self, other=None, degrees=True):
         """Calculate the rotation of one or two vectors
         The rotation is calculated with the vector (1,0)

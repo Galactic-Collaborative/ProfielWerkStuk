@@ -1,8 +1,12 @@
 from __future__ import annotations
-from classes.Vector import Vector2D
 from typing import List, NewType, Union, Type
 import math
 from pyglet import shapes
+
+if __name__ == "__main__":
+    from Vector import Vector2D
+else:
+    from classes.Vector import Vector2D
 
 class linline:
     """A mathematical representation of a linear line
@@ -35,7 +39,7 @@ class linline:
     def fromVector(cls, direction, location=Vector2D(0,0)):
         a = direction.y
         b = direction.x
-        c = location.x * a - location.y * b
+        c = location.x * a + location.y * b
         return cls(a,b,c)
     
     @classmethod
@@ -58,9 +62,11 @@ class linline:
         if(type(point2) == tuple):
             point2 = Vector2D.fromTuple(point2)
 
-        a = point2.x - point1.x
-        b = -point2.y + point1.y
-        c = point1.x * a - point1.y * b
+        r = point1 - point2
+        n = r.toNormalVector()
+        a = n.x
+        b = n.y
+        c = n @ point1
         
         limit = [point1.x, point2.x] if b != 0 else [point1.y, point2.y]
         return cls(a,b,c, limit=sorted(limit))
@@ -78,23 +84,21 @@ class linline:
         `Vector2D` A vector if a match is found \n
         `None` None if no match is found
         """
+        if (self.a * other.b - self.b * other.a) == 0: #paralel lines
+            return None
+
         if self.b == 0 or other.b == 0:
-            y = (self.c * other.a - self.a * other.c)/(self.a * other.b - self.b * other.a)
+            y = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
             x = self.calcX(y)
         else:
             x = (self.c * other.b - self.b * other.c)/(self.a * other.b - self.b * other.a)
             y = self.calcY(x)
+
+        x1 = (self.c * other.b - self.b * other.c)/(self.a * other.b - self.b * other.a)
+        y1 = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
         
         if not None in [x,y]:
             return Vector2D(x,y) if self._checkDomain(x,y,self,other) else None
-
-
-        if (self.rc - other.rc) != 0:
-            new_x = (other.b - self.b) / (self.rc - other.rc)
-            if self.limit[0] <= new_x <= self.limit[1] and other.limit[0] <= new_x <= other.limit[1]: 
-                return Vector2D(new_x, self.calc(new_x))
-            else:
-                return None
         else:
             return None
 
@@ -136,6 +140,11 @@ class linline:
                 checkedVar = x
 
             collided = (line.limit[0] <= checkedVar <= line.limit[1])
+            if __name__ == "__main__":
+                print(line1)
+                print(line2)
+                print(collided)
+            
             if not collided: 
                 break
         
@@ -179,19 +188,20 @@ class linline:
         return line
 
     def __str__(self):
-        return f"Linear Line: {self.a}x - {self.b}y = {self.c} -> Limit: {self.limit}"
+        return f"Linear Line: {self.a}x + {self.b}y = {self.c} -> Limit: {self.limit}"
     
     def __repr__(self):
-        return f"linline({self.rc}x - {self.b}y = {self.c} , limit={self.limit})"
+        return f"linline({self.rc}x + {self.b}y = {self.c} , limit={self.limit})"
 
 
 if __name__ == "__main__":
-    l1 = linline(1, 1, 0, limit=[-3,3])
-    l2 = linline.fromVector(Vector2D(-1,1))
+    l1 = linline.fromPoints((1,1), (1,0))
     print(l1)
+    print(l1.b)
+    l2 = linline.fromPoints((0,0),(4,4))
     print(l2)
     print(l1.intersect(l2))
 
-    l3 = linline.fromPoints((-2,-1),(3,1))
-    print(l3.intersect(linline(1,0,1)))
+    l3 = linline.fromPoints((3,3),(8,13))
+    print(l2.intersect(l3))
 

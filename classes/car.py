@@ -1,6 +1,6 @@
 import pyglet
 import math
-from classes.line import linline
+from classes.improvedLine import linline
 from classes.Vector import Vector2D
 
 class Car():
@@ -16,7 +16,7 @@ class Car():
         self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
         self.scale = 1.48
 
-        self.carRotation = Vector2D(1,0)
+        self.carRotation = Vector2D(1,1)
 
         self.eyesList = [[0, 200], [200, 200], [200, 0], [200, -200], [0, -200], [-200, 0]]
         self.hitboxVectors = [[3, 3], [33, 3], [33, 23], [3, 23]]

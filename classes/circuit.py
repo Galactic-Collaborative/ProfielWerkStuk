@@ -1,5 +1,5 @@
 from math import atan, sqrt
-from classes.line import linline
+from classes.improvedLine import linline
 from classes.Vector import Vector2D
 import math
 import pyglet
@@ -117,7 +117,7 @@ class circuit():
         self.lines = plines
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     # Testing
     window = pyglet.window.Window(resizable=True, fullscreen=True) 
 
@@ -128,7 +128,14 @@ if __name__ == "main":
     outer = [Vector2D(i[0],i[1]) for i in outer_points]
 
 
-    circ = circuit.fromFullPoints([inner, outer])
+    checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[0,6],[3,7]],[[-1,13],[3,12]],[[4,13],[7,15]],[[6,9],[10,11]],[[11,5],[12,9]],[[15,10],[18,7]],[[15,10],[14,13]],[[9,14],[13,13]],[[15,17],[16,15]],[[21,12],[24,15]],[[22,8],[25,6]],[[19,5],[20,1]],[[15,-1],[15,4]]]
+    circuit_checkpoints = []
+    for i, checkpoint in enumerate(checkpoints):
+        circuit_checkpoints.append([])
+        for x, point in enumerate(checkpoint):
+            circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
+
+    circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1))
     batch = pyglet.graphics.Batch()
     group = pyglet.graphics.OrderedGroup(0)
     running = True

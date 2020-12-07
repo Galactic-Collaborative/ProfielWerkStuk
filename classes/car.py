@@ -11,8 +11,7 @@ class Car():
         self.velocity = Vector2D(0,0)
         self.position = Vector2D(x, y)
 
-
-        self.sprites = {"alive": pyglet.resource.image('img/car.png'),"dead": pyglet.resource.image('img/carCrash.png')}
+        self.sprites = {"alive": pyglet.resource.image('img/car.png'),"best": pyglet.resource.image('img/carBest.png'),"dead": pyglet.resource.image('img/carCrash.png')}
         self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
         self.scale = 1.48
 
@@ -27,15 +26,24 @@ class Car():
         
         self.observation = [None] * len(self.eyesList)
 
-    def draw(self, batch, group):
-        car = self.drawCar(batch, group)
+        #GA
+        self.finished = False
+        self.bestCar = False
+        self.fitness = 0
+        self.goal = False
+
+    def draw(self, batch, group, best=False):
+        car = self.drawCar(batch, group, best)
         return car
 
-    def drawCar(self, batch, group):
-        if not self.dead:
-            car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
-        else:
+    def drawCar(self, batch, group, best):
+        if self.dead:
             car = pyglet.sprite.Sprite(self.sprites['dead'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+        elif best:
+            car = pyglet.sprite.Sprite(self.sprites['best'], x=self.position.x, y=self.position.y, batch=batch, group=group)    
+        else:
+            car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+
         car.scale = self.scale
         car.anchor_x = car.width // 2
         car.anchor_y = car.height // 2
@@ -105,11 +113,9 @@ class Car():
 
     def forward(self):
         self.forces += Vector2D(100,0)
-        #self.reverse = False
 
     def backward(self):
         self.forces += Vector2D(-100,0)
-        #self.reverse = True
 
     def left(self):
         self.forces += Vector2D(0, self._getTurnForce())
@@ -128,6 +134,22 @@ class Car():
             self.left()
         if key_handler[key.RIGHT]:
             self.right()
+        
+        self._calculatePhysics(dt)
+
+    def updateGA(self, dt, instruction):
+        self.forces = Vector2D(0,0)
+
+        if(instruction == 0):
+            self.forward()
+        elif(instruction == 1):
+            self.backward()
+        elif(instruction == 2):
+            self.left()
+        elif(instruction == 3):
+            self.right()
+        else:
+            print("Random is not done well")
         
         self._calculatePhysics(dt)
 

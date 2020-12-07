@@ -179,7 +179,6 @@ running = True
 def on_close():
     running = False
 
-
 @window.event
 def on_draw():
     render()

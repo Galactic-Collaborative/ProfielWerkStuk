@@ -94,7 +94,7 @@ class Car():
             l.color = lineColor[i]
             hitbox.append(l)
             previousPoint = nextPoint
-
+        
         return hitbox
 
     def intersectEyes(self, batch, lines, group):

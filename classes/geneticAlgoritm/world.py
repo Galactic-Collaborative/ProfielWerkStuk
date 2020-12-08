@@ -3,10 +3,12 @@ from classes.Vector import Vector2D
 from classes.geneticAlgoritm.agent import Agent
 
 class World:
-    def __init__(self, cars, window) -> None:
+    def __init__(self, cars, carX, carY, window) -> None:
         self.window = Vector2D.fromTuple(window)
         self.goal = self.window
-        self.carList = [Agent(window=self.window, goal=(self.goal-Vector2D(10,10))) for _ in range(cars)]
+        self.carX = carX
+        self.carY = carY
+        self.carList = [Agent(carX, carY, window=self.window, goal=(self.goal-Vector2D(10,10))) for _ in range(cars)]
 
         self.fitnessSum = 0
         self.gen = 1
@@ -15,8 +17,8 @@ class World:
 
         self.minStep = 1000
 
-    def draw(self, batch, group):
-        drawList = [car.draw(batch, group) for car in self.carList]
+    def draw(self, batch, foreground, background, vertices):
+        drawList = [car.draw(batch, foreground, background, vertices) for car in self.carList]
         return drawList
 
     def update(self, dt):
@@ -26,6 +28,10 @@ class World:
             else:
                 car.update(dt)
 
+    def generateHitbox(self, car):
+        hitbox = car.generateHitbox()
+        return hitbox
+        
     def allCarsDead(self) -> bool:
         for car in self.carList:
             if not car.dead and not car.finished:
@@ -41,11 +47,11 @@ class World:
         self.setBestCar()
         self.calcFitnessSum()
 
-        nextGen.append(self.carList[self.bestCar].clone(best=True))
+        nextGen.append(self.carList[self.bestCar].clone(self.carX, self.carY, best=True))
         for _ in range(1, len(self.carList)):
             parent = self.selectParent()
             if parent != None:
-                nextGen.append(parent.clone())
+                nextGen.append(parent.clone(self.carX, self.carY))
 
         self.carList = nextGen[:]
         self.gen += 1

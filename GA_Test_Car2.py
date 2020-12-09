@@ -1,5 +1,5 @@
 import pyglet
-from classes.geneticAlgoritm.world import World
+from classes.geneticAlgoritmNN.world import World
 from classes.circuit import circuit
 from classes.Vector import Vector2D
 

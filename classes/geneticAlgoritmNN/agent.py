@@ -1,35 +1,38 @@
 from classes.car import Car
-from classes.geneticAlgoritm.brain import Brain
+from classes.geneticAlgoritmNN.neuralNetwork import NeuralNetwork
 
 class Agent:
     def __init__(self, carX, carY, window, goal, best=False):
         self.car = Car(carX, carY)
         self.window = window
         self.dead = self.car.dead
-        self.finished = self.car.finished
+        self.finished = False
         self.fitness = 0
+        self.step = 0
+        self.maxStep = 1000
         
-        self.brain = Brain(5000)
+        self.nn = NeuralNetwork()
         self.goal = goal
         self.bestCar = best
         
     def draw(self, batch, foreground, background, vertices, show):
         car = self.car.draw(batch, foreground, self.bestCar)
+        intersectEyes = self.car.intersectEyes(batch, vertices, background)
         if show:
             eyes = self.car.eyes(batch, background)
             hitbox = self.car.hitbox(batch, background)
-            intersectEyes = self.car.intersectEyes(batch, vertices, background)
-            return car, eyes, hitbox, intersectEyes
-        return car
+            return car, eyes, hitbox
+        return car, intersectEyes
 
     def generateHitbox(self):
         hitbox = self.car.generateHitbox()
         return hitbox
 
     def move(self, dt):
-        if(self.brain.step < len(self.brain.instructions)):
-            instruction = self.brain.instructions[self.brain.step]
-            self.brain.step += 1
+        if self.step < self.maxStep:
+            inputnn = self.car.observation
+            instruction = self.nn.feedforward(inputnn)
+            self.step += 1
             
             self.car.updateGA(dt, instruction)
         else:
@@ -46,7 +49,6 @@ class Agent:
                 self.finished = True
         else:
             self.car.dead = self.dead
-            self.car.finished = self.finished
 
     def calcFitness(self):
         if self.finished:
@@ -56,5 +58,5 @@ class Agent:
 
     def clone(self, carX, carY, best=False):
         baby = Agent(carX, carY, window=self.window, goal=self.goal, best=best)
-        baby.brain = self.brain.clone()
+        baby.nn = self.nn.clone()
         return baby

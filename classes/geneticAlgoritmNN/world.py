@@ -1,6 +1,6 @@
 import random
 from classes.Vector import Vector2D
-from classes.geneticAlgoritm.agent import Agent
+from classes.geneticAlgoritmNN.agent import Agent
 
 class World:
     def __init__(self, cars, carX, carY, window) -> None:
@@ -29,7 +29,7 @@ class World:
 
     def update(self, dt):
         for car in self.carList:
-            if car.brain.step > self.minStep:
+            if car.step > self.minStep:
                 car.dead = True
             else:
                 car.update(dt)
@@ -65,7 +65,7 @@ class World:
 
     def mutateAll(self):
         for i in range(1, len(self.carList)):
-            self.carList[i].brain.mutate()
+            self.carList[i].nn.mutate()
 
     def selectParent(self):
         rand = random.random() * self.fitnessSum

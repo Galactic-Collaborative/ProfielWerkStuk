@@ -17,7 +17,7 @@ class Car():
 
         self.carRotation = Vector2D(1,1)
 
-        self.eyesList = [[0, 200], [200, 200], [200, 0], [200, -200], [0, -200], [-200, 0]]
+        self.eyesList = [[0, 500], [500, 500], [500, 0], [500, -500], [0, -500], [-500, 0]]
         self.hitboxVectors = [[3, 3], [33, 3], [33, 23], [3, 23]]
         self.dead = False
         self.middle = Vector2D(0,0)
@@ -27,10 +27,8 @@ class Car():
         self.observation = [None] * len(self.eyesList)
 
         #GA
-        self.finished = False
         self.bestCar = False
         self.fitness = 0
-        self.goal = False
 
     def draw(self, batch, group, best=False):
         car = self.drawCar(batch, group, best)
@@ -94,7 +92,7 @@ class Car():
             l.color = lineColor[i]
             hitbox.append(l)
             previousPoint = nextPoint
-
+        
         return hitbox
 
     def intersectEyes(self, batch, lines, group):

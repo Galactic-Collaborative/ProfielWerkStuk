@@ -25,6 +25,8 @@ class Car():
         self.lines = []
         
         self.observation = [None] * len(self.eyesList)
+        
+        self.currentCheckpoint = 0
 
         #GA
         self.bestCar = False

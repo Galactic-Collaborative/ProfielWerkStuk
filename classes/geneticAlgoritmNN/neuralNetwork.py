@@ -37,18 +37,12 @@ class NeuralNetwork:
 
     def mutate(self):
         mutationRate = 0.01
-        for i in range(len(self.W1)):
-            for y in range(i):
-                for z in range(y):
+        for weight in [self.W1, self.W2]:
+            for i in range(weight.shape[0]):
+                for j in range(weight.shape[1]):
                     rand = random.random()
                     if(rand < mutationRate):
-                        self.W1[i][y][z] = random.uniform(0, 1)
-        for i in range(len(self.W2)):
-            for y in range(i):
-                for z in range(y):
-                    rand = random.random()
-                    if(rand < mutationRate):
-                        self.W2[i][y][z] = random.uniform(0, 1)        
+                        weight[i][j] = random.uniform(0, 1)
 
 if __name__ == "__main__":
     nn = NeuralNetwork()

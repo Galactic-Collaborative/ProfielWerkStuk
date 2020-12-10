@@ -48,9 +48,7 @@ class circuit():
 
     def carCollidedWithCheckpoint(self, hitbox) -> bool:
         for line in hitbox:
-            print(self.checkpoints[self.currentCheckpoint])
             if self.checkpoints[self.currentCheckpoint].intersect(line) != None:
-                print('HIT!')
                 self.spawnNextCheckpoint()
                 return True
         return False
@@ -111,7 +109,6 @@ class circuit():
                 b = points[j].y - yotta*points[j].x
 
                 line = linline(rc,b,[points[j].x - 100,points[j].x + 100])
-                print(line)
                 plines.append(line)
 
         self.lines = plines

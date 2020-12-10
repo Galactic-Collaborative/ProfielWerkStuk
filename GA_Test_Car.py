@@ -25,13 +25,13 @@ class Brain:
 
 class Agent:
     def __init__(self, window, goal, best=False):
-        self.car = Car(300, 200)
+        self.car = Car(10, 10)
         self.window = window
         self.dead = self.car.dead
         self.finished = self.car.finished
         self.fitness = 0
         
-        self.brain = Brain(2000)
+        self.brain = Brain(10000)
         self.goal = goal
         self.bestCar = best
         

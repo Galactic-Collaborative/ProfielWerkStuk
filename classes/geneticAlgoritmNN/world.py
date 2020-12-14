@@ -5,10 +5,9 @@ from classes.geneticAlgoritmNN.agent import Agent
 class World:
     def __init__(self, cars, carX, carY, window) -> None:
         self.window = Vector2D.fromTuple(window)
-        self.goal = self.window
         self.carX = carX
         self.carY = carY
-        self.carList = [Agent(self.carX, self.carY, window=self.window, goal=(self.goal-Vector2D(10,10))) for _ in range(cars)]
+        self.carList = [Agent(self.carX, self.carY, window=self.window) for _ in range(cars)]
         self.show = False
         self.showA = True
 
@@ -40,7 +39,6 @@ class World:
         
     def allCarsDead(self) -> bool:
         for car in self.carList:
-            # if not car.dead and not car.finished:
             if not car.dead:
                 return False
         return True
@@ -58,11 +56,12 @@ class World:
         for _ in range(1, len(self.carList)):
             parent = self.selectParent()
             if parent == None:
-                nextGen.append(Agent(self.carX, self.carY, window=self.window, goal=(self.goal-Vector2D(10,10))))
+                nextGen.append(Agent(self.carX, self.carY, window=self.window))
             else:
                 nextGen.append(parent.clone(self.carX, self.carY))
 
         self.carList = nextGen[:]
+        del nextGen
         self.gen += 1
         print(f"NEXT GEN: {self.gen}")
 
@@ -95,6 +94,3 @@ class World:
             if(car.fitness > topFitness):
                 topFitness = car.fitness 
                 self.bestCar = i
-
-        # if(self.carList[self.bestCar].finished):
-        #     self.minStep = self.carList[self.bestCar].brain.step

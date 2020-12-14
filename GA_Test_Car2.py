@@ -78,7 +78,6 @@ def render():
 
     carDrawings = world.draw(batch, foreground, background, circ.vertices)
     circuitDraw = circ.draw(batch, window.get_size(), circuitLayer)
-    goal = pyglet.shapes.Circle(window.get_size()[0]-10, window.get_size()[1]-10, 10, color=(0,255,0), batch=batch)
     batch.draw()
 
 if __name__ == "__main__":

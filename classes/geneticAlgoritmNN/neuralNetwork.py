@@ -42,7 +42,7 @@ class NeuralNetwork:
                 for j in range(weight.shape[1]):
                     rand = random.random()
                     if(rand < mutationRate):
-                        weight[i][j] = random.uniform(0, 1)
+                        weight[i][j] = np.random.randn()
 
 if __name__ == "__main__":
     nn = NeuralNetwork()

@@ -56,17 +56,15 @@ class circuit():
                     return True
         return False
 
-    def carCollidedWithCheckpoint(self, hitbox) -> bool:
+    def carCollidedWithCheckpoint(self, hitbox, currentCheckpoint) -> bool:
         for line in hitbox:
-            print(self.checkpoints[self.currentCheckpoint])
-            if self.checkpoints[self.currentCheckpoint].intersect(line) != None:
-                print('HIT!')
-                self.spawnNextCheckpoint()
-                return True
-        return False
+            if self.checkpoints[currentCheckpoint].intersect(line) != None:
+                currentCheckpoint = self.spawnNextCheckpoint(currentCheckpoint)
+        return currentCheckpoint
 
-    def spawnNextCheckpoint(self):
-        self.currentCheckpoint = (self.currentCheckpoint + 1)%len(self.checkpoints)
+    def spawnNextCheckpoint(self, currentCheckpoint):
+        currentCheckpoint = (currentCheckpoint + 1)%len(self.checkpoints)
+        return currentCheckpoint
 
     def draw(self, batch, screen, group):
         out = []
@@ -158,7 +156,6 @@ class circuit():
                 b = points[j].y - yotta*points[j].x
 
                 line = linline(rc,b,[points[j].x - 100,points[j].x + 100])
-                print(line)
                 plines.append(line)
         """
 

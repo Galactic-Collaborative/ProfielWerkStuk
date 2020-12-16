@@ -1,60 +1,55 @@
 from classes.car import Car
-from classes.geneticAlgoritm.brain import Brain
+from classes.geneticAlgoritmNN.neuralNetwork import NeuralNetwork
 
 class Agent:
-    def __init__(self, carX, carY, window, goal, best=False):
+    def __init__(self, carX, carY, window, best=False):
         self.car = Car(carX, carY)
         self.window = window
         self.dead = self.car.dead
-        self.finished = self.car.finished
         self.fitness = 0
+        self.step = 0
+        self.maxStep = 1000
         
-        self.brain = Brain(5000)
-        self.goal = goal
+        self.nn = NeuralNetwork()
         self.bestCar = best
         
     def draw(self, batch, foreground, background, vertices, show):
         car = self.car.draw(batch, foreground, self.bestCar)
-        if show:
+        intersectEyes = self.car.intersectEyes(batch, vertices, background)
+        if show or not self.dead:
             eyes = self.car.eyes(batch, background)
             hitbox = self.car.hitbox(batch, background)
-            intersectEyes = self.car.intersectEyes(batch, vertices, background)
-            return car, eyes, hitbox, intersectEyes
-        return car
+            return car, intersectEyes, eyes, hitbox
+        return car, intersectEyes
 
     def generateHitbox(self):
         hitbox = self.car.generateHitbox()
         return hitbox
 
     def move(self, dt):
-        if(self.brain.step < len(self.brain.instructions)):
-            instruction = self.brain.instructions[self.brain.step]
-            self.brain.step += 1
+        if self.step < self.maxStep:
+            inputnn = self.car.observation
+            instruction = self.nn.feedforward(inputnn)
+            self.step += 1
             
             self.car.updateGA(dt, instruction)
         else:
             self.dead = True
 
     def update(self, dt):
-        if not self.dead and not self.finished:
+        if not self.dead:
             self.move(dt)
 
             pos = self.car.position
             if(pos.x < 2 or pos.y < 2 or pos.x > self.window.x-2 or pos.y > self.window.y-2):
                 self.dead = True
-            elif(abs(self.goal - pos) < 10):
-                self.finished = True
         else:
             self.car.dead = self.dead
-            self.car.finished = self.finished
 
     def calcFitness(self):
-        if self.finished:
-            self.fitness = 1/16 + 10000/(self.brain.step**2)
-        else:
-            self.fitness = 1/(abs(self.goal - self.car.position)**2)
+        self.fitness = (self.car.currentCheckpoint*1000)/(self.step**2) 
 
     def clone(self, carX, carY, best=False):
-        baby = Agent(carX, carY, window=self.window, goal=self.goal, best=best)
-        baby.brain = self.brain.clone()
+        baby = Agent(carX, carY, window=self.window, best=best)
+        baby.nn = self.nn.clone()
         return baby

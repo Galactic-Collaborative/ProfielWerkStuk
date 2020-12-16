@@ -1,5 +1,5 @@
 import pyglet
-from classes.geneticAlgoritm.world import World
+from classes.geneticAlgoritmNN.world import World
 from classes.circuit import circuit
 from classes.Vector import Vector2D
 
@@ -37,10 +37,19 @@ def on_draw():
 
 def update(dt):
     window.push_handlers(key_handler)
+    carList = world.carList
     if(world.allCarsDead()):
         world.calcFitness()
         world.naturalSelection()
         world.mutateAll()
+
+        check = []
+        check2 = []
+        for car in carList:
+            check.append(car.car.currentCheckpoint)
+            check2.append(car.fitness)
+        print(check)
+        print(check2)
     else:
         if key_handler[key.S]:
             world.show = True
@@ -52,10 +61,9 @@ def update(dt):
         if key_handler[key.A]:
             world.showA = True
 
-        carList = world.carList
         for car in carList:
             hitbox = world.generateHitbox(car)
-            # circ.carCollidedWithCheckpoint(hitbox)
+            car.car.currentCheckpoint = circ.carCollidedWithCheckpoint(hitbox, car.car.currentCheckpoint)
             if circ.collidedWithCar(hitbox) == True:
                 car.dead = True
         
@@ -70,7 +78,6 @@ def render():
 
     carDrawings = world.draw(batch, foreground, background, circ.vertices)
     circuitDraw = circ.draw(batch, window.get_size(), circuitLayer)
-    goal = pyglet.shapes.Circle(window.get_size()[0]-10, window.get_size()[1]-10, 10, color=(0,255,0), batch=batch)
     batch.draw()
 
 if __name__ == "__main__":

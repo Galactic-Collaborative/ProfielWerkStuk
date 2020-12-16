@@ -1,8 +1,6 @@
+from __future__ import annotations
 import math
-import typing
-
-# Typing
-Vector2D = typing.NewType("Vector2D", object)
+from typing import Union, List, Tuple
 
 class Vector2D:
     """A mathematical representation of a 2-dimensional vector
@@ -187,6 +185,13 @@ class Vector2D:
     def linear_interpolate(self, B, T):
         interpolation = self * (1-T) + B * T
         return interpolation
+
+    @staticmethod
+    def convertToVector(*args: Union[List,Tuple,List[List],List[Tuple]]):
+        """
+        Convert a list to a vector, or a list of points to vectors
+        """
+        pass
 
 
 ### Testing###

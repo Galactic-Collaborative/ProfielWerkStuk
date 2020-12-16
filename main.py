@@ -20,7 +20,7 @@ for i, checkpoint in enumerate(checkpoints):
     for x, point in enumerate(checkpoint):
         circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
-circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1))
+circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1), window=window.get_size())
 car = Car(300,200)
 car.position = circ.startingPoint
 

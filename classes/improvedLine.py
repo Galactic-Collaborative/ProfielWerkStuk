@@ -4,9 +4,14 @@ import math
 from pyglet import shapes
 
 if __name__ == "__main__":
+    debugging = True
+else:
+    debugging = False
+
+if debugging:
     from Vector import Vector2D
 else:
-    from classes.Vector import Vector2D
+    from Vector import Vector2D
 
 class linline:
     """A mathematical representation of a linear line
@@ -18,6 +23,7 @@ class linline:
         self.a = a
         self.b = b
         self.c = c
+        self.r = Vector2D(a,b)
         self.limit = limit
         self.color = color
     
@@ -84,8 +90,21 @@ class linline:
         `Vector2D` A vector if a match is found \n
         `None` None if no match is found
         """
-        if (self.a * other.b - self.b * other.a) == 0: #paralel lines
+
+        if self.a == other.a and self.b == other.b:#paralel lines
+            if debugging: print('paralel!')
             return None
+
+        if (self.a == 0 and other.b == 0) or (other.a == 0 and self.b == 0) == True: #lines with 90 degrees corners
+            print('I was right!')
+            if self.a == 0:
+                x = 1/other.a * other.c
+                y = 1/self.b * self.c
+                return Vector2D(x,y) if self._checkDomain(x,y,self,other) else None
+            else:
+                x = 1/self.a * self.c
+                y = 1/other.b * other.c
+                return Vector2D(x,y) if self._checkDomain(self.calcX(0),other.calcY(0),self,other) else None
 
         if self.b == 0 or other.b == 0:
             y = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
@@ -94,12 +113,10 @@ class linline:
             x = (self.c * other.b - self.b * other.c)/(self.a * other.b - self.b * other.a)
             y = self.calcY(x)
 
-        x1 = (self.c * other.b - self.b * other.c)/(self.a * other.b - self.b * other.a)
-        y1 = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
-        
         if not None in [x,y]:
             return Vector2D(x,y) if self._checkDomain(x,y,self,other) else None
         else:
+            if debugging: print('Something None')
             return None
 
     def calc(self, x: float) -> float:
@@ -188,20 +205,17 @@ class linline:
         return line
 
     def __str__(self):
-        return f"Linear Line: {self.a}x + {self.b}y = {self.c} -> Limit: {self.limit}"
+        return f"{self.a}x + {self.b}y = {self.c} {self.limit}"
     
     def __repr__(self):
-        return f"linline({self.rc}x + {self.b}y = {self.c} , limit={self.limit})"
+        return f"linline({self.a}x + {self.b}y = {self.c} , limit={self.limit})"
 
 
 if __name__ == "__main__":
-    l1 = linline.fromPoints((1,1), (1,0))
-    print(l1)
-    print(l1.b)
-    l2 = linline.fromPoints((0,0),(4,4))
-    print(l2)
+    l1 = linline(0,-6,294)
+    l2 = linline(-3,0,147)
     print(l1.intersect(l2))
 
-    l3 = linline.fromPoints((3,3),(8,13))
-    print(l2.intersect(l3))
+    # l3 = linline.fromPoints((3,3),(8,13))
+    # print(l2.intersect(l3))
 

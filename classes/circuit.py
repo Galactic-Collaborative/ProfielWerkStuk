@@ -12,14 +12,14 @@ import pyglet
 from typing import List
 
 class circuit():
-    def __init__(self, vertices: List[linline], checkpoints: List[linline], startingPoint=Vector2D(0,0)) -> None:
+    def __init__(self, vertices: List[linline], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
         self.vertices = vertices
         self.checkpoints = checkpoints
 
         self.currentCheckpoint = 0
 
         self.startingPoint = startingPoint
-    
+        self.monocar = monocar    
     @classmethod
     def fromSkeletonPoints(cls, points, startingPoint=Vector2D(0,0)):
         vertices, checkpoints = cls.generate(points, 100)
@@ -27,7 +27,7 @@ class circuit():
 
 
     @classmethod
-    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1820,1080)) -> None:
+    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1820,1080), monocar: bool=True) -> None:
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
@@ -35,6 +35,7 @@ class circuit():
         max_y = max([p.x for p in points[0]])
         scale = min((window[0]/max_x, window[1]/max_y))
         startPoint = startingPoint*scale + margin
+
         #Create a list of lines from the points
         for lane in points:
             for i in range(len(lane)):
@@ -47,7 +48,7 @@ class circuit():
             checkpoint.append(l)
 
 
-        return cls(lines, checkpoint, startingPoint=startPoint)
+        return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar)
 
     def collidedWithCar(self, hitbox) -> bool:
         for line in self.vertices:
@@ -56,11 +57,14 @@ class circuit():
                     return True
         return False
 
-    def carCollidedWithCheckpoint(self, hitbox, currentCheckpoint) -> bool:
-        for line in hitbox:
+    def carCollidedWithCheckpoint(self, car) -> bool:
+        currentCheckpoint = car.currentCheckpoint
+        for line in car.generateHitbox():
             if self.checkpoints[currentCheckpoint].intersect(line) != None:
                 currentCheckpoint = self.spawnNextCheckpoint(currentCheckpoint)
-        return currentCheckpoint
+
+        self.currentCheckpoint = car.currentCheckpoint = currentCheckpoint
+        return car.currentCheckpoint
 
     def spawnNextCheckpoint(self, currentCheckpoint):
         currentCheckpoint = (currentCheckpoint + 1)%len(self.checkpoints)
@@ -71,7 +75,7 @@ class circuit():
         for line in self.vertices:
             out.append(line.draw(batch, group, screen))
         
-        if self.checkpoints:
+        if self.monocar:
             out.append(self.checkpoints[(self.currentCheckpoint + (len(self.checkpoints) - 1))%len(self.checkpoints)].draw(batch, group, screen))
             out.append(self.checkpoints[self.currentCheckpoint].draw(batch, group, screen))
             out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))

@@ -11,7 +11,7 @@ else:
 if debugging:
     from Vector import Vector2D
 else:
-    from Vector import Vector2D
+    from classes.Vector import Vector2D
 
 class linline:
     """A mathematical representation of a linear line
@@ -90,13 +90,12 @@ class linline:
         `Vector2D` A vector if a match is found \n
         `None` None if no match is found
         """
-
-        if self.a == other.a and self.b == other.b:#paralel lines
-            if debugging: print('paralel!')
+        #print(f"self = {self}\nother = {other}") 
+        if (self.a == other.a) or (self.b == 0 and other.b == 0) or (self.a == self.b and other.a == other.b) or (self.a == -self.b and other.a == -other.b):#paralel lines
+            print('paralel!')
             return None
 
         if (self.a == 0 and other.b == 0) or (other.a == 0 and self.b == 0) == True: #lines with 90 degrees corners
-            print('I was right!')
             if self.a == 0:
                 x = 1/other.a * other.c
                 y = 1/self.b * self.c
@@ -106,7 +105,10 @@ class linline:
                 y = 1/other.b * other.c
                 return Vector2D(x,y) if self._checkDomain(self.calcX(0),other.calcY(0),self,other) else None
 
-        if self.b == 0 or other.b == 0:
+        vertical = (self.b == 0 or other.b == 0)
+        if not((self.b == 0 or other.b == 0)) and ((self.b * other.a - self.a * other.b) == 0):
+            x = y = (other.c - (other.b*self.c)/self.b)/(other.a - (other.b*self.a)/self.b)
+        elif self.b == 0 or other.b == 0:
             y = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
             x = self.calcX(y)
         else:

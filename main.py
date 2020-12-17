@@ -43,8 +43,8 @@ def update(dt):
     window.push_handlers(key_handler)
     if(running):
         car.update(dt, key, key_handler)
+        circ.carCollidedWithCheckpoint(car)
         hitbox = car.generateHitbox()
-        circ.carCollidedWithCheckpoint(hitbox)
         if circ.collidedWithCar(hitbox) == True:
             car.dead = True
     else:

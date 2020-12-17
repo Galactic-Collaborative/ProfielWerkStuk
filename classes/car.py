@@ -165,7 +165,7 @@ class Car():
         return 400
 
     def _calculatePhysics(self, dt):
-        #Calculate acceleration based on forces andl limit it to 100 pixels per second per second
+        #Calculate acceleration based on forces and limit it to 100 pixels per second per second
         self.acceleration = self.forces.rotate(self.carRotation.rotation()) / self.mass
         self.acceleration.limit(100)
 

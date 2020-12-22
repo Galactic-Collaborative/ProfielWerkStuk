@@ -27,7 +27,7 @@ class circuit():
 
 
     @classmethod
-    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> None:
+    def fromFullPoints(cls, points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> None:
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
@@ -47,7 +47,6 @@ class circuit():
             l = linline.fromPoints(line[0]*scale+margin,line[1]*scale+margin)
             l.color = (255,215,0)
             checkpoint.append(l)
-
 
         return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar)
 

@@ -109,7 +109,6 @@ class Car():
         #     l.color = lineColor[i]
         #     hitbox.append(l)
         #     previousPoint = nextPoint
-        
         return hitbox
 
     def observe(self):

@@ -46,8 +46,16 @@ class Agent:
         else:
             self.car.dead = self.dead
 
-    def calcFitness(self):
-        self.fitness = (self.car.currentCheckpoint*1000)/(self.step**2) 
+    def calcFitness(self, outsideLines):
+        minimum = 100000
+        for line in outsideLines:
+            distance = line.distance(self.car.position)
+            if distance < minimum:
+                minimum = distance
+                minLine = line
+        
+        index = outsideLines.index(minLine)
+        self.fitness = (index*1000)/(self.step**2) 
 
     def clone(self, carX, carY, best=False):
         baby = Agent(carX, carY, window=self.window, best=best)

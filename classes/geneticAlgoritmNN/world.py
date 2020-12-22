@@ -43,9 +43,9 @@ class World:
                 return False
         return True
 
-    def calcFitness(self):
+    def calcFitness(self, outsideLines):
         for car in self.carList:
-            car.calcFitness()
+            car.calcFitness(outsideLines)
 
     def naturalSelection(self):
         nextGen = []
@@ -75,10 +75,9 @@ class World:
         runningSum = 0
 
         for car in self.carList:
-            if not car.bestCar:
-                runningSum += car.fitness
-                if runningSum > rand:
-                    return car
+            runningSum += car.fitness
+            if runningSum > rand:
+                return car
         return None
 
     def calcFitnessSum(self):

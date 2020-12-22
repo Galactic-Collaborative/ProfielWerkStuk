@@ -18,7 +18,7 @@ for i, checkpoint in enumerate(checkpoints):
     for x, point in enumerate(checkpoint):
         circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
-circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1))
+circ = circuit.fromFullPoints(inner, outer, circuit_checkpoints, Vector2D(12,1))
 world = World(50, circ.startingPoint.x, circ.startingPoint.y, window=window.get_size())
 batch = pyglet.graphics.Batch()
 
@@ -39,7 +39,7 @@ def update(dt):
     window.push_handlers(key_handler)
     carList = world.carList
     if(world.allCarsDead()):
-        world.calcFitness()
+        world.calcFitness(circ.outer)
         world.naturalSelection()
         world.mutateAll()
 
@@ -65,7 +65,7 @@ def update(dt):
             hitbox = world.generateHitbox(agent)
             agent.car.currentCheckpoint = circ.carCollidedWithCheckpoint(agent.car)
             if circ.collidedWithCar(hitbox) == True:
-                car.dead = True
+                agent.dead = True
         
         world.update(dt)
 

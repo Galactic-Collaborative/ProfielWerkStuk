@@ -54,6 +54,7 @@ class circuitEnv(py_environment.PyEnvironment):
     
     def _reset(self):
         self.agent.reset()
+        
         self._episode_ended = False
         return ts.restart(np.array([self.state], dtype=np.int32))
     

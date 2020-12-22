@@ -13,13 +13,16 @@ from typing import List
 
 class circuit():
     def __init__(self, vertices: List[linline], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
-        self.vertices = vertices
+        self.innerLines = vertices[0]
+        self.outerLines = vertices[1]
+        self.vertices = [item for sublist in vertices for item in sublist]
         self.checkpoints = checkpoints
 
         self.currentCheckpoint = 0
 
         self.startingPoint = startingPoint
         self.monocar = monocar    
+    
     @classmethod
     def fromSkeletonPoints(cls, points, startingPoint=Vector2D(0,0)):
         vertices, checkpoints = cls.generate(points, 100)
@@ -38,10 +41,12 @@ class circuit():
         startPoint = startingPoint*scale + margin
 
         #Create a list of lines from the points
-        for lane in points:
+        for k, lane in enumerate(points):
+            lines.append([])
+            print(lines)
             for i in range(len(lane)):
                 j = (i+1)%len(lane)
-                lines.append(linline.fromPoints(lane[i]*scale+margin,lane[j]*scale+margin))
+                lines[k].append(linline.fromPoints(lane[i]*scale+margin,lane[j]*scale+margin))
         
         for line in checkpoints:
             l = linline.fromPoints(line[0]*scale+margin,line[1]*scale+margin)
@@ -109,7 +114,7 @@ class circuit():
 
             for j in range(2):
                 w = points[i] + normal_vector*(-1)**(j+1)
-                c = lines[i].r @ w
+                c = lines[i].n @ w
                 paralel_lines[j].append(linline(lines[i].a, lines[i].b, c))
 
 
@@ -135,35 +140,10 @@ class circuit():
         #generate
         checkpoints = []
         maximum_length = sum([abs(v) for v in directions])
-        
-        
+
         vertices = [item for sublist in paralel_lines for item in sublist]
         print(vertices)
         return (vertices, checkpoints)
-
-
-        """
-        Define bissectrice P
-        If snijpunt(bissectrice P, L1) == snijpunt(bissectrice P, L2):
-            limit updaten
-        
-        for i in range(len(lines)):
-            j = (i+1)%len(lines)
-
-            a = lines[i].rc
-            c = lines[j].rc
-
-            if(a+c != 0):
-                yotta = (a*c - 1 + math.sqrt(a**2 + 1)*math.sqrt(c**2 + 1))/(a+c)
-                yotta = -1/yotta
-                rc = yotta
-                b = points[j].y - yotta*points[j].x
-
-                line = linline(rc,b,[points[j].x - 100,points[j].x + 100])
-                plines.append(line)
-        """
-
-        return plines
 
 
 if __name__ == "__main__":

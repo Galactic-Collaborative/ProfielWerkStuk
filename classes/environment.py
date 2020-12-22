@@ -12,13 +12,12 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.environments import utils
 from tf_agents.specs import array_spec
 from tf_agents.environments import wrappers
-from tf_agents.environments import suite_gym
 from tf_agents.trajectories import time_step as ts
 from tf_agents.trajectories.time_step import transition
 
 from classes.car import Car
-from classes.circuit import Circuit
-from classes.vector import Vector2D
+from classes.circuit import circuit
+from classes.Vector import Vector2D
 
 tf.compat.v1.enable_v2_behavior()
 
@@ -27,6 +26,12 @@ outer_points = [[18,0],[8,0],[2,3],[0,9],[0,14],[2,16],[5,16],[8,12],[9,9],[12,8
 inner = [Vector2D(i[0],i[1]) for i in inner_points]
 outer = [Vector2D(i[0],i[1]) for i in outer_points]
 
+checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[0,6],[3,7]],[[-1,13],[3,12]],[[4,13],[7,15]],[[6,9],[10,11]],[[11,5],[12,9]],[[15,10],[18,7]],[[15,10],[14,13]],[[9,14],[13,13]],[[15,17],[16,15]],[[21,12],[24,15]],[[22,8],[25,6]],[[19,5],[20,1]],[[15,-1],[15,4]]]
+circuit_checkpoints = []
+for i, checkpoint in enumerate(checkpoints):
+    circuit_checkpoints.append([])
+    for x, point in enumerate(checkpoint):
+        circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
 class circuitEnv(py_environment.PyEnvironment):
     def __init__(self) -> None:
@@ -37,7 +42,7 @@ class circuitEnv(py_environment.PyEnvironment):
             shape=(4,), dtype=np.float32, minimum=0, name="observation"
         )
 
-        self.circuit = Circuit.fromFullPoints([inner, outer])
+        self.circuit = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1))
         self.agent = Car(0,0)
         self._episode_ended = False
 
@@ -48,7 +53,7 @@ class circuitEnv(py_environment.PyEnvironment):
         return self._observation_spec
     
     def _reset(self):
-        self.car.reset()
+        self.agent.reset()
         self._episode_ended = False
         return ts.restart(np.array([self.state], dtype=np.int32))
     
@@ -57,20 +62,20 @@ class circuitEnv(py_environment.PyEnvironment):
             return self.reset()
 
         if action == 0:
-            self.car.forward()
+            self.agent.forward()
         elif action == 1:
-            self.car.backward()
+            self.agent.backward()
         elif action == 2:
-            self.car.left()
+            self.agent.left()
         elif action == 3:
-            self.car.right()
+            self.agent.right()
         else:
             raise ValueError("`action` should be in range of 0 to 3")
 
         #run physics
-        self.car.update()
-        hitbox = self.car.generateHitbox()
-        self.car.intersectEyes()
+        self.agent.update()
+        hitbox = self.agent.generateHitbox()
+        self.agent.intersectEyes()
 
         if self.circuit.collidedWithCar(hitbox):
             self._episode_ended = True
@@ -81,7 +86,7 @@ class circuitEnv(py_environment.PyEnvironment):
             return ts.transition(self._observe(), reward=1.0, discount=1.0)
     
     def _observe(self):
-        return np.ndarray(self.car.observation)
+        return np.ndarray(self.agent.observation)
 
 
 

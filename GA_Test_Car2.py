@@ -63,7 +63,7 @@ def update(dt):
 
         for car in carList:
             hitbox = world.generateHitbox(car)
-            car.car.currentCheckpoint = circ.carCollidedWithCheckpoint(hitbox, car.car.currentCheckpoint)
+            car.car.currentCheckpoint = circ.carCollidedWithCheckpoint(car.car)
             if circ.collidedWithCar(hitbox) == True:
                 car.dead = True
         

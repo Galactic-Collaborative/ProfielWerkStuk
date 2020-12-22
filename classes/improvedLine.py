@@ -90,9 +90,9 @@ class linline:
         `Vector2D` A vector if a match is found \n
         `None` None if no match is found
         """
-        #print(f"self = {self}\nother = {other}") 
-        if (self.a == other.a) or (self.b == 0 and other.b == 0) or (self.a == self.b and other.a == other.b) or (self.a == -self.b and other.a == -other.b):#paralel lines
-            print('paralel!')
+        #print(f"self = {self}\nother = {other}")
+        #print((round(self.a,5) == round(self.b,5) and round(other.a,5) == round(other.b,5)) or (round(self.a,5) == -round(self.b,5) and round(other.a,5) == -round(other.b,5)))
+        if (self.a == other.a) or (self.b == 0 and other.b == 0) or (round(self.a,5) == round(self.b,5) and round(other.a,5) == round(other.b,5)) or (round(self.a,5) == -round(self.b,5) and round(other.a,5) == -round(other.b,5)):#paralel lines
             return None
 
         if (self.a == 0 and other.b == 0) or (other.a == 0 and self.b == 0) == True: #lines with 90 degrees corners

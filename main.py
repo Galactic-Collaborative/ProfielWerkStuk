@@ -17,7 +17,7 @@ checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[0,6],[3,7]],[[-1,13],[3,12]],[[4
 circuit_checkpoints = []
 for i, checkpoint in enumerate(checkpoints):
     circuit_checkpoints.append([])
-    for x, point in enumerate(checkpoint):
+    for point in checkpoint:
         circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
 circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1), window=window.get_size())

@@ -9,18 +9,25 @@ class Car():
         self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)
         self.velocity = Vector2D(0,0)
+        self.startPosition = Vector2D(x, y)
         self.position = Vector2D(x, y)
 
         self.sprites = {"alive": pyglet.resource.image('img/car.png'),"best": pyglet.resource.image('img/carBest.png'),"dead": pyglet.resource.image('img/carCrash.png')}
-        self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
         self.scale = 1.48
+        self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
 
         self.carRotation = Vector2D(1,1)
 
         self.eyesList = [[0, 500], [500, 500], [500, 0], [500, -500], [0, -500], [-500, 0]]
-        self.hitboxVectors = [[3, 3], [33, 3], [33, 23], [3, 23]]
+        self.hitboxVectors = [
+            Vector2D(-self.image_dimensions[0]/2,-self.image_dimensions[1]/2),
+            Vector2D(-self.image_dimensions[0]/2,self.image_dimensions[1]/2),
+            Vector2D(self.image_dimensions[0]/2,self.image_dimensions[1]/2),
+            Vector2D(self.image_dimensions[0]/2,-self.image_dimensions[1]/2),
+        ]
+
         self.dead = False
-        self.middle = Vector2D(0,0)
+        self.middle = Vector2D(self.image_dimensions[0]//2,self.image_dimensions[1]//2)
         
         self.lines = []
         
@@ -45,8 +52,8 @@ class Car():
             car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
 
         car.scale = self.scale
-        car.anchor_x = car.width // 2
-        car.anchor_y = car.height // 2
+        car.anchor_x = car.width / 2
+        car.anchor_y = car.height / 2
         car.rotation = -(self.carRotation.rotation())
         return car
 
@@ -74,8 +81,10 @@ class Car():
         return lines
 
     def hitbox(self, batch, group):
-        hitboxVectors = self.generateHitbox()
+        #points = [point.rotate(self.carRotation.rotation(), in_place=False) + self.middle for point in self.hitboxVectors]
+        #out = [pyglet.shapes.Circle(p.x,p.y,5, batch=batch, group=group) for p in points]
         out = []
+        hitboxVectors = self.generateHitbox()
 
         for hitboxLine in hitboxVectors:
             out.append(hitboxLine.draw(batch, group))
@@ -83,19 +92,28 @@ class Car():
 
     def generateHitbox(self):
         hitbox = []
-        hitboxVectors = [Vector2D(i[0],i[1]) for i in self.hitboxVectors]
-        previousPoint = self.position + Vector2D(5, 5)
         lineColor = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
 
-        for i in range(len(hitboxVectors)):
-            j = (i+1)%len(hitboxVectors)
-            nextPoint = self.position + hitboxVectors[j].rotate(self.carRotation.rotation())
-            l = linline.fromPoints(previousPoint, nextPoint)
+        rotation = self.carRotation.rotation()
+
+        points = [point.rotate(rotation, in_place=False) + self.middle for point in self.hitboxVectors]
+        for i in range(len(points)):
+            l = linline.fromPoints(points[i-1], points[i])
             l.color = lineColor[i]
             hitbox.append(l)
-            previousPoint = nextPoint
+
+        # for i in range(len(hitboxVectors)):
+        #     j = (i+1)%len(hitboxVectors)
+        #     nextPoint = self.position + hitboxVectors[j].rotate(self.carRotation.rotation())
+        #     l = linline.fromPoints(previousPoint, nextPoint)
+        #     l.color = lineColor[i]
+        #     hitbox.append(l)
+        #     previousPoint = nextPoint
         
         return hitbox
+
+    def observe(self):
+        pass
 
     def intersectEyes(self, batch, lines, group):
         dots = []
@@ -154,20 +172,12 @@ class Car():
         self._calculatePhysics(dt)
 
     def _getTurnForce(self):
-        if self.velocity.x != 0:
-            c = 10
-            sigmoid = lambda x : 1 / (1 + math.e**-(x-c))
-
-            sidewayForce = 1/sigmoid(abs(self.velocity)) * 40
-        else:
-            sidewayForce = 0
-        #return sidewayForce
-        return 400
+        return 4000
 
     def _calculatePhysics(self, dt):
         #Calculate acceleration based on forces and limit it to 100 pixels per second per second
         self.acceleration = self.forces.rotate(self.carRotation.rotation()) / self.mass
-        self.acceleration.limit(100)
+        self.acceleration.limit(200)
 
         #Calculate velocity based on accelation and limit it to 200 pixels per second
         self.velocity += self.acceleration * dt
@@ -184,6 +194,11 @@ class Car():
         
         self.middle = self.position + Vector2D.fromTuple(self.image_dimensions).rotate(self.carRotation.rotation()) * self.scale * 0.5
         
+    def reset(self):
+        self.forces = Vector2D(0,0)
+        self.acceleration = Vector2D(0,0)
+        self.velocity = Vector2D(0,0)
+        self.position = self.startPosition
 
 
 """

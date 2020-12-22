@@ -61,9 +61,9 @@ def update(dt):
         if key_handler[key.A]:
             world.showA = True
 
-        for car in carList:
-            hitbox = world.generateHitbox(car)
-            car.car.currentCheckpoint = circ.carCollidedWithCheckpoint(hitbox, car.car.currentCheckpoint)
+        for agent in carList:
+            hitbox = world.generateHitbox(agent)
+            agent.car.currentCheckpoint = circ.carCollidedWithCheckpoint(agent.car)
             if circ.collidedWithCar(hitbox) == True:
                 car.dead = True
         

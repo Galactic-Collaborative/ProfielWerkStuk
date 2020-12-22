@@ -27,13 +27,14 @@ class circuit():
 
 
     @classmethod
-    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1820,1080), monocar: bool=True) -> None:
+    def fromFullPoints(cls,points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> None:
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
-        max_x = max([p.x for p in points[0]])
-        max_y = max([p.x for p in points[0]])
-        scale = min((window[0]/max_x, window[1]/max_y))
+        allpoints = [item for sublist in points for item in sublist]
+        max_x = max([p.x for p in allpoints])
+        max_y = max([p.y for p in allpoints])
+        scale = min((window[0]-2*margin.x)/max_x, (window[1]-2*margin.y)/max_y)
         startPoint = startingPoint*scale + margin
 
         #Create a list of lines from the points

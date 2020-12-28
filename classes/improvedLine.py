@@ -23,23 +23,10 @@ class linline:
         self.a = a
         self.b = b
         self.c = c
-        self.r = Vector2D(a,b)
+        self.r = Vector2D(a,-b)
+        self.n = Vector2D(a,b)
         self.limit = limit
         self.color = color
-    
-    """@classmethod
-    def fromString(cls, string: str, variable="x"):
-       ""
-        DEPRECATED
-        Create a line from a string
-
-        The string has to be in the form of "ax+b".\n
-        Change the variable with the second argument. Pass the variable as a string like 'p'.
-
-       ""
-        rc, b = string.split(variable)[:2]
-        return cls(rc, b)
-    """
 
     @classmethod
     def fromVector(cls, direction, location=Vector2D(0,0)):
@@ -77,7 +64,7 @@ class linline:
         limit = [point1.x, point2.x] if b != 0 else [point1.y, point2.y]
         return cls(a,b,c, limit=sorted(limit))
 
-    def intersect(self, other) -> Vector2D: # TODO
+    def intersect(self, other, debug=False) -> Vector2D: # TODO
         """Calculate the point on which the two lines intersect
         
         The two lines intersect on one point. Intersect() calculates
@@ -90,36 +77,47 @@ class linline:
         `Vector2D` A vector if a match is found \n
         `None` None if no match is found
         """
-        #print(f"self = {self}\nother = {other}")
         #print((round(self.a,5) == round(self.b,5) and round(other.a,5) == round(other.b,5)) or (round(self.a,5) == -round(self.b,5) and round(other.a,5) == -round(other.b,5)))
-        if (self.a == other.a) or (self.b == 0 and other.b == 0) or (round(self.a,5) == round(self.b,5) and round(other.a,5) == round(other.b,5)) or (round(self.a,5) == -round(self.b,5) and round(other.a,5) == -round(other.b,5)):#paralel lines
-            return None
+        try: 
+            if ((self.a == other.a) 
+                or (self.b == 0 and other.b == 0) 
+                or (round(self.a,5) == round(self.b,5) and round(other.a,5) == round(other.b,5)) 
+                or (round(self.a,5) == -round(self.b,5) and round(other.a,5) == -round(other.b,5)) 
+                or (self.b * other.a - self.a * other.b) == 0):#paralel lines
+                return None
 
-        if (self.a == 0 and other.b == 0) or (other.a == 0 and self.b == 0) == True: #lines with 90 degrees corners
-            if self.a == 0:
-                x = 1/other.a * other.c
-                y = 1/self.b * self.c
-                return Vector2D(x,y) if self._checkDomain(x,y,self,other) else None
+            if (self.a == 0 and other.b == 0) or (other.a == 0 and self.b == 0) == True: #lines with 90 degrees corners
+                if self.a == 0:
+                    x = 1/other.a * other.c
+                    y = 1/self.b * self.c
+                    return Vector2D(x,y) if self._checkDomain(x,y,self,other) else None
+                else:
+                    x = 1/self.a * self.c
+                    y = 1/other.b * other.c
+                    return Vector2D(x,y) if self._checkDomain(self.calcX(0),other.calcY(0),self,other) else None
+
+            vertical = (self.b == 0 or other.b == 0)
+            if not((self.b == 0 or other.b == 0)) and ((self.b * other.a - self.a * other.b) == 0):
+                x = y = (other.c - (other.b*self.c)/self.b)/(other.a - (other.b*self.a)/self.b)
+            elif self.b == 0 or other.b == 0:
+                y = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
+                x = self.calcX(y)
             else:
-                x = 1/self.a * self.c
-                y = 1/other.b * other.c
-                return Vector2D(x,y) if self._checkDomain(self.calcX(0),other.calcY(0),self,other) else None
+                x = (self.c * other.b - self.b * other.c)/(self.a * other.b - self.b * other.a)
+                y = self.calcY(x)
 
-        vertical = (self.b == 0 or other.b == 0)
-        if not((self.b == 0 or other.b == 0)) and ((self.b * other.a - self.a * other.b) == 0):
-            x = y = (other.c - (other.b*self.c)/self.b)/(other.a - (other.b*self.a)/self.b)
-        elif self.b == 0 or other.b == 0:
-            y = (self.c * other.a - self.a * other.c)/(self.b * other.a - self.a * other.b)
-            x = self.calcX(y)
-        else:
-            x = (self.c * other.b - self.b * other.c)/(self.a * other.b - self.b * other.a)
-            y = self.calcY(x)
-
-        if not None in [x,y]:
-            return Vector2D(x,y) if self._checkDomain(x,y,self,other) else None
-        else:
-            if debugging: print('Something None')
-            return None
+            if not None in [x,y]:
+                if self._checkDomain(x,y,self,other):
+                    return Vector2D(x,y)  
+                else:
+                    if debug: print("Domain Error")
+                    return None
+            else:
+                if debugging: print('Something None')
+                return None
+        except ZeroDivisionError:
+            print(f"self = {self}\nother = {other}")
+            raise ZeroDivisionError()
 
     def calc(self, x: float) -> float:
         """Calculate the output with a given x value

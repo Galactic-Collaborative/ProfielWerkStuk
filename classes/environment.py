@@ -2,22 +2,22 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import abc
+import pyglet
 import tensorflow as tf
 import numpy as np
 
 from tf_agents.environments import py_environment
-from tf_agents.environments import tf_environment
-from tf_agents.environments import tf_py_environment
-from tf_agents.environments import utils
 from tf_agents.specs import array_spec
-from tf_agents.environments import wrappers
 from tf_agents.trajectories import time_step as ts
-from tf_agents.trajectories.time_step import transition
 
-from classes.car import Car
-from classes.circuit import circuit
-from classes.Vector import Vector2D
+if __name__ == "__main__":
+    from classes.car import Car
+    from classes.circuit import circuit
+    from classes.Vector import Vector2D
+else:
+    from classes.car import Car
+    from classes.circuit import circuit
+    from classes.Vector import Vector2D
 
 tf.compat.v1.enable_v2_behavior()
 
@@ -33,18 +33,26 @@ for i, checkpoint in enumerate(checkpoints):
     for x, point in enumerate(checkpoint):
         circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
+#HYPERPARAMETERS
+dt = 1/60
+
+
 class circuitEnv(py_environment.PyEnvironment):
     def __init__(self) -> None:
         self._action_spec = array_spec.BoundedArraySpec(
             shape=(), dtype=np.int32, minimum=0, maximum=3, name="action"
         )
         self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(4,), dtype=np.float32, minimum=0, name="observation"
+            shape=(8,), dtype=np.float32, minimum=0, name="observation"
         )
 
         self.circuit = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1))
-        self.agent = Car(0,0)
+        self.agent = Car(self.circuit.startingPoint.x,self.circuit.startingPoint.y)
         self._episode_ended = False
+        self.stepCountingVariableThatWillNotInterfere = 0
+
+        self.batch = pyglet.graphics.Batch()
+
 
     def action_spec(self):
         return self._action_spec
@@ -53,42 +61,51 @@ class circuitEnv(py_environment.PyEnvironment):
         return self._observation_spec
     
     def _reset(self):
+        print(f"Resetting: round {self.stepCountingVariableThatWillNotInterfere}")
+        self.stepCountingVariableThatWillNotInterfere += 1
         self.agent.reset()
-        
+        self.agent.updateWithInstruction(dt, None)
+        self.agent.mathIntersect(self.circuit.vertices)
+
         self._episode_ended = False
-        return ts.restart(np.array([self.state], dtype=np.int32))
+        return ts.restart(self._observe())
     
     def _step(self, action):
         if self._episode_ended:
             return self.reset()
 
-        if action == 0:
-            self.agent.forward()
-        elif action == 1:
-            self.agent.backward()
-        elif action == 2:
-            self.agent.left()
-        elif action == 3:
-            self.agent.right()
-        else:
-            raise ValueError("`action` should be in range of 0 to 3")
-
         #run physics
-        self.agent.update()
+        self.agent.updateWithInstruction(dt, action)
         hitbox = self.agent.generateHitbox()
-        self.agent.intersectEyes()
+        self.agent.mathIntersect(self.circuit.vertices)
 
         if self.circuit.collidedWithCar(hitbox):
             self._episode_ended = True
-            return ts.termination(np.array([]), reward=-2.0)
-        elif self.circuit.carCollidedWithCheckpoint(hitbox):
+            return ts.termination(self._observe(), reward=-2.0)
+        elif self.circuit.carCollidedWithCheckpoint(self.agent):
             return ts.transition(self._observe(),reward=3.0, discount=1.0)
         else:
-            return ts.transition(self._observe(), reward=1.0, discount=1.0)
+            return ts.transition(self._observe(), reward=1.0, discount=0.95)
     
     def _observe(self):
-        return np.ndarray(self.agent.observation)
+        return np.array(self.agent.observe(), dtype=np.float32)
 
+
+
+
+
+    ### DRAWING STUFF ###
+
+    def draw(self):
+        layers = {
+            "circuit": pyglet.graphics.OrderedGroup(0),
+            "background": pyglet.graphics.OrderedGroup(1),
+            "car": pyglet.graphics.OrderedGroup(2),
+        }
+        drawList = []
+        drawList.append(self.agent.draw2(self.batch, layers))
+        drawList.append(self.agent.intersectEyes(self.batch, self.circuit.vertices, layers['background']))
+        drawList.append(self.circuit.draw(self.batch, [1920,1080], layers["circuit"]))
 
 
 

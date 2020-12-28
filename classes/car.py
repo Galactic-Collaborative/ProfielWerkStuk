@@ -18,7 +18,7 @@ class Car():
 
         self.carRotation = Vector2D(1,1)
 
-        self.eyesList = [[0, 500], [500, 500], [500, 0], [500, -500], [0, -500], [-500, 0]]
+        self.eyesList = [[0, 5000], [5000, 5000], [5000, 0], [5000, -5000], [0, -5000], [-5000, 0]]
         self.hitboxVectors = [
             Vector2D(-self.image_dimensions[0]/2,-self.image_dimensions[1]/2),
             Vector2D(-self.image_dimensions[0]/2,self.image_dimensions[1]/2),
@@ -31,7 +31,7 @@ class Car():
         
         self.lines = []
         
-        self.observation = [None] * len(self.eyesList)
+        self.observation = []
         
         self.currentCheckpoint = 0
 
@@ -43,7 +43,18 @@ class Car():
         car = self.drawCar(batch, group, best)
         return car
 
-    def drawCar(self, batch, group, best):
+
+    def draw2(self, batch, layers, options="f"):
+        
+        drawList = [self.drawCar(batch, layers['car']),
+            self.eyes(batch, layers['background']),
+            self.hitbox(batch, layers['background']),
+        ]
+
+        return drawList
+
+
+    def drawCar(self, batch, group, best=False):
         if self.dead:
             car = pyglet.sprite.Sprite(self.sprites['dead'], x=self.position.x, y=self.position.y, batch=batch, group=group)
         elif best:
@@ -102,32 +113,47 @@ class Car():
             l.color = lineColor[i]
             hitbox.append(l)
 
-        # for i in range(len(hitboxVectors)):
-        #     j = (i+1)%len(hitboxVectors)
-        #     nextPoint = self.position + hitboxVectors[j].rotate(self.carRotation.rotation())
-        #     l = linline.fromPoints(previousPoint, nextPoint)
-        #     l.color = lineColor[i]
-        #     hitbox.append(l)
-        #     previousPoint = nextPoint
-        
         return hitbox
 
     def observe(self):
-        pass
-
+        observations = [abs(self.velocity), abs(self.acceleration)]
+        
+        for point in self.circuitIntersections:
+            observations.append(abs(self.middle - point))
+        
+        return observations
+        
     def intersectEyes(self, batch, lines, group):
         dots = []
+        self.circuitIntersections = []
 
         for n, eyeline in enumerate(self.lines):
             intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
             minList = [abs(self.middle - point) for point in intersect]
-            self.observation[n] = 1000
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 point = intersect[pointIndex[0]]
-                self.observation[n] = abs(self.middle - point)
+                self.circuitIntersections.append(point)
                 dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
         return dots
+
+    def mathIntersect(self, lines):
+        self.circuitIntersections = []
+        for eyeline in self.generateLines():
+            intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
+            minList = [abs(self.middle - point) for point in intersect]
+            if len(minList):
+                pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
+                self.circuitIntersections.append(intersect[pointIndex[0]])
+            else:
+                for l in lines:
+                    print(l.intersect(eyeline, debug=True))
+                print(self.position)
+                print(self.velocity)
+                print(self.carRotation.rotation())
+                print(self.acceleration)
+
+
 
     def forward(self):
         self.forces += Vector2D(100,0)
@@ -155,7 +181,7 @@ class Car():
         
         self._calculatePhysics(dt)
 
-    def updateGA(self, dt, instruction):
+    def updateWithInstruction(self, dt, instruction):
         self.forces = Vector2D(0,0)
 
         if(instruction == 0):
@@ -166,10 +192,13 @@ class Car():
             self.left()
         elif(instruction == 3):
             self.right()
+        elif None:
+            pass
         else:
-            print("Random is not done well")
+            print("Notice: UpdateWithInstruction() can only handle ints from 0 to 3")
         
         self._calculatePhysics(dt)
+
 
     def _getTurnForce(self):
         return 4000
@@ -198,27 +227,4 @@ class Car():
         self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)
         self.velocity = Vector2D(0,0)
-        self.position = self.startPosition
-
-
-"""
-        if self.velocity.x != 0:
-            self.carRotation = self.velocity.copy()
-            self.carRotation.normalize()
-
-        if self.reverse == True:
-            if (self.velocity.x < 0 and velocityPrevious.x >= 0) or (self.velocity.x >= 0 and velocityPrevious.x < 0):
-                self.reverse2 = True
-        else:
-            if (self.velocity.x < 0 and velocityPrevious.x >= 0) or (self.velocity.x >= 0 and velocityPrevious.x < 0):
-                self.reverse2 = False
-
-        if self.reverse2 == False:
-            self.position += self.carRotation * abs(self.velocity) * dt
-            self.carRotation.rotation() = self.carRotation.rotation()
-        else:
-            self.carRotation.rotate(180)
-            self.velocity.limit(100)
-            self.position += self.carRotation * -abs(self.velocity) * dt
-            self.carRotation.rotation() = self.carRotation.rotation()
-        self.middle = self.position + Vector2D(25, 15).rotate(self.carRotation.rotation())"""
+        self.position = self.startPosition.copy()

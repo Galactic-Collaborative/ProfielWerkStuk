@@ -43,7 +43,6 @@ class circuit():
         #Create a list of lines from the points
         for k, lane in enumerate(points):
             lines.append([])
-            print(lines)
             for i in range(len(lane)):
                 j = (i+1)%len(lane)
                 lines[k].append(linline.fromPoints(lane[i]*scale+margin,lane[j]*scale+margin))

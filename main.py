@@ -5,7 +5,6 @@ from classes.Vector import Vector2D
 
 ### MAIN LOOP
 # config = pyglet.gl.Config(sample_buffers=1, samples=4)
-window = pyglet.window.Window(resizable=True, fullscreen=True) 
 
 
 inner_points = [[18,3],[8,3],[5,4],[3,6],[2,9],[2,12],[3,14],[4,14],[6,12],[7,8],[8,7],[12,6],[16,6],[19,9],[20,11],[16,13],[13,12],[12,14],[13,15],[17,16],[20,15],[22,13],[23,8],[21,5]]

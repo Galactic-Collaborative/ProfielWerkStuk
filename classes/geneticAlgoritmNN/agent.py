@@ -18,8 +18,9 @@ class Agent:
         intersectEyes = self.car.intersectEyes(batch, vertices, background)
         if show or not self.dead:
             eyes = self.car.eyes(batch, background)
-            hitbox = self.car.hitbox(batch, background)
-            return car, intersectEyes, eyes, hitbox
+            # hitbox = self.car.hitbox(batch, background)
+            # return car, intersectEyes, eyes, hitbox
+            return car, intersectEyes, eyes
         return car, intersectEyes
 
     def generateHitbox(self):
@@ -46,10 +47,21 @@ class Agent:
         else:
             self.car.dead = self.dead
 
-    def calcFitness(self):
-        self.fitness = (self.car.currentCheckpoint*1000)/(self.step**2) 
+    def calcFitness(self, outsideLines):
+        minimum = 100000
+        for line in outsideLines:
+            distance = line.distance(self.car.position)
+            if distance < minimum:
+                minimum = distance
+                minLine = line
+        
+        index = outsideLines.index(minLine)
+        if self.car.currentCheckpoint != 0:
+            self.fitness = (self.car.currentCheckpoint*100) + (index*100)/(self.step**2)
+        else:
+            self.fitness = 0
 
-    def clone(self, carX, carY, best=False):
+    def clone(self, carX, carY, best):
         baby = Agent(carX, carY, window=self.window, best=best)
         baby.nn = self.nn.clone()
         return baby

@@ -33,8 +33,8 @@ class World:
             else:
                 car.update(dt)
 
-    def generateHitbox(self, car):
-        hitbox = car.generateHitbox()
+    def generateHitbox(self, agent):
+        hitbox = agent.generateHitbox()
         return hitbox
         
     def allCarsDead(self) -> bool:
@@ -43,42 +43,59 @@ class World:
                 return False
         return True
 
-    def calcFitness(self):
+    def calcFitness(self, outsideLines):
         for car in self.carList:
-            car.calcFitness()
+            car.calcFitness(outsideLines)
 
     def naturalSelection(self):
+        self.gen += 1
+        print(" ")
+        print(" ")
+        print(f"NEXT GEN: {self.gen}")
+
+        check = []
+        check2 = []
+        for agent in self.carList:
+            check.append(agent.car.currentCheckpoint)
+            check2.append(agent.fitness)
+        print(" ")
+        print("Current Checkpoint:")
+        print(check)
+        print(" ")
+        print("Fitness:")
+        print(check2)
+
         nextGen = []
         self.setBestCar()
         self.calcFitnessSum()
 
         nextGen.append(self.carList[self.bestCar].clone(self.carX, self.carY, best=True))
-        for _ in range(1, len(self.carList)):
-            parent = self.selectParent()
-            if parent == None:
-                nextGen.append(Agent(self.carX, self.carY, window=self.window))
-            else:
-                nextGen.append(parent.clone(self.carX, self.carY))
+        # for _ in range(1, len(self.carList)):
+        #     parent = self.selectParent()
+        #     if parent == None:
+        #         nextGen.append(Agent(self.carX, self.carY, window=self.window, best=False))
+        #     else:
+        #         nextGen.append(parent.clone(self.carX, self.carY, best=False))
 
+        for _ in range(1, len(self.carList)):
+            nextGen.append(self.carList[self.bestCar].clone(self.carX, self.carY, best=False))
+
+        self.carList.clear()
         self.carList = nextGen[:]
         del nextGen
-        self.gen += 1
-        print(f"NEXT GEN: {self.gen}")
 
     def mutateAll(self):
         for i in range(1, len(self.carList)):
-            if i != self.bestCar:
-                self.carList[i].nn.mutate()
+            self.carList[i].nn.mutate()
 
     def selectParent(self):
         rand = random.random() * self.fitnessSum
         runningSum = 0
 
         for car in self.carList:
-            if not car.bestCar:
-                runningSum += car.fitness
-                if runningSum > rand:
-                    return car
+            runningSum += car.fitness
+            if runningSum > rand:
+                return car
         return None
 
     def calcFitnessSum(self):
@@ -94,3 +111,4 @@ class World:
             if(car.fitness > topFitness):
                 topFitness = car.fitness 
                 self.bestCar = i
+        print(f"Best Car: {self.bestCar}")

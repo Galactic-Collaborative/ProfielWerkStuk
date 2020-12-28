@@ -23,7 +23,7 @@ class linline:
         self.a = a
         self.b = b
         self.c = c
-        self.r = Vector2D(a,b)
+        self.n = Vector2D(a,b)
         self.limit = limit
         self.color = color
     
@@ -173,7 +173,7 @@ class linline:
     def distance(self, point):
         # d = (abs(self.a * point.x + self.b * point.y - self.c))/math.sqrt(self.a**2 + self.b**2)
         # return d 
-        d = (abs(self.n @ point - self.c))/abs(self)
+        d = (abs(self.n @ point - self.c))/abs(self.n)
         return d       
         
     def draw(self, batch, group, screen=[1920,1080], width=10):

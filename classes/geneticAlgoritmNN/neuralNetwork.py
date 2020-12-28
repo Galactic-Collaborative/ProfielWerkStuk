@@ -47,10 +47,38 @@ class NeuralNetwork:
 if __name__ == "__main__":
     nn = NeuralNetwork()
 
+    # print("NN1:")
+    # print(nn.W1)
+    # print(" ")
+    # print(nn.W2)
+    # print(" ")
+
+    nn2 = NeuralNetwork()
+
+    # print(" ")
+    # print("NN2 1:")
+    # print(nn2.W1)
+    # print(" ")
+    # print(nn2.W2)
+    # print(" ")
+
+    nn2.W1 = nn.W1
+    nn2.W2 = nn.W2
+    
+    # print(" ")
+    # print("NN2 2:")
+    # print(nn2.W1)
+    # print(" ")
+    # print(nn2.W2)
+    # print(" ")
+
     nn_input = [5, 3, 5, 1, 7, 8]
 
     output = nn.feedforward(nn_input)
+    output2 = nn2.feedforward(nn_input)
 
+    if output == output2:
+        print("True")
     if output == 0:
         print(0)
     elif output == 1:
@@ -63,30 +91,42 @@ if __name__ == "__main__":
         print("Number is not an int of 0-3")
         print(output)
 
-    print(nn.W1)
-    print(" ")
-    print(nn.W2)
-    print(" ")
+    if output2 == 0:
+        print(0)
+    elif output2 == 1:
+        print(1)
+    elif output2 == 2:
+        print(2)
+    elif output2 == 3:
+        print(3)
+    else:
+        print("Number is not an int of 0-3")
+        print(output)
 
-    test = 100
-    while test < 100:
-        nn.mutate()
-        test += 1
+    # print(nn.W1)
+    # print(" ")
+    # print(nn.W2)
+    # print(" ")
+
+    # test = 100
+    # while test < 100:
+    #     nn.mutate()
+    #     test += 1
     
-    output = nn.feedforward(nn_input)
+    # output = nn.feedforward(nn_input)
 
-    if output == 0:
-        print(0)
-    elif output == 1:
-        print(1)
-    elif output == 2:
-        print(2)
-    elif output == 3:
-        print(3)
-    else:
-        print("Number is not an int of 0-3")
-        print(output)
+    # if output == 0:
+    #     print(0)
+    # elif output == 1:
+    #     print(1)
+    # elif output == 2:
+    #     print(2)
+    # elif output == 3:
+    #     print(3)
+    # else:
+    #     print("Number is not an int of 0-3")
+    #     print(output)
 
-    print(nn.W1)
-    print(" ")
-    print(nn.W2)
+    # print(nn.W1)
+    # print(" ")
+    # print(nn.W2)

@@ -38,18 +38,22 @@ class Car():
         #GA
         self.bestCar = False
         self.fitness = 0
+        self.currentLap = 0
 
-    def draw(self, batch, group, best=False):
+    def draw(self, batch, group, best):
         car = self.drawCar(batch, group, best)
         return car
 
     def drawCar(self, batch, group, best):
         if self.dead:
             car = pyglet.sprite.Sprite(self.sprites['dead'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+            car.opacity = 25
         elif best:
             car = pyglet.sprite.Sprite(self.sprites['best'], x=self.position.x, y=self.position.y, batch=batch, group=group)    
+            car.opacity = 100
         else:
             car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+            car.opacity = 75
 
         car.scale = self.scale
         car.anchor_x = car.width / 2
@@ -81,8 +85,6 @@ class Car():
         return lines
 
     def hitbox(self, batch, group):
-        #points = [point.rotate(self.carRotation.rotation(), in_place=False) + self.middle for point in self.hitboxVectors]
-        #out = [pyglet.shapes.Circle(p.x,p.y,5, batch=batch, group=group) for p in points]
         out = []
         hitboxVectors = self.generateHitbox()
 
@@ -125,7 +127,7 @@ class Car():
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 point = intersect[pointIndex[0]]
                 self.observation[n] = abs(self.middle - point)
-                dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
+                #dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
         return dots
 
     def forward(self):

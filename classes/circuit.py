@@ -30,7 +30,7 @@ class circuit():
 
 
     @classmethod
-    def fromFullPoints(cls, points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> None:
+    def fromFullPoints(cls, points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=False) -> None:
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
@@ -43,7 +43,6 @@ class circuit():
         #Create a list of lines from the points
         for k, lane in enumerate(points):
             lines.append([])
-            print(lines)
             for i in range(len(lane)):
                 j = (i+1)%len(lane)
                 lines[k].append(linline.fromPoints(lane[i]*scale+margin,lane[j]*scale+margin))
@@ -84,6 +83,9 @@ class circuit():
             out.append(self.checkpoints[(self.currentCheckpoint + (len(self.checkpoints) - 1))%len(self.checkpoints)].draw(batch, group, screen))
             out.append(self.checkpoints[self.currentCheckpoint].draw(batch, group, screen))
             out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))
+        
+        for line in self.checkpoints:
+            out.append(line.draw(batch, group, screen))
 
         return out
     

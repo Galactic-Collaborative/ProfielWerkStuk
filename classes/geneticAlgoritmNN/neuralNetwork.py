@@ -12,8 +12,8 @@ class NeuralNetwork:
     def relu(self, x):
         return np.maximum(0, x)        
 
-    def feedforward(self, X):
-        inputEyes = [100000 if v is None else v for v in X]
+    def feedforward(self, inputnn):
+        inputEyes = [100000 if v is None else v for v in inputnn]
         
         self.dot1 = np.dot(inputEyes, self.W1)
         self.activation1 = self.relu(self.dot1)
@@ -36,13 +36,16 @@ class NeuralNetwork:
         return clone
 
     def mutate(self):
-        mutationRate = 0.01
+        mutationRate = 1
         for weight in [self.W1, self.W2]:
             for i in range(weight.shape[0]):
                 for j in range(weight.shape[1]):
                     rand = random.random()
                     if(rand < mutationRate):
-                        weight[i][j] = np.random.randn()
+                        print(weight[i][j])
+                        weight[i][j] += random.uniform(-1, 1)
+                        print(weight[i][j])
+                        print(" ")
 
 if __name__ == "__main__":
     nn = NeuralNetwork()
@@ -70,6 +73,15 @@ if __name__ == "__main__":
     # print(nn2.W1)
     # print(" ")
     # print(nn2.W2)
+    # print(" ")
+
+    nn3 = nn.clone()
+
+    # print(" ")
+    # print("NN3:")
+    # print(nn3.W1)
+    # print(" ")
+    # print(nn3.W2)
     # print(" ")
 
     nn_input = [5, 3, 5, 1, 7, 8]
@@ -103,6 +115,9 @@ if __name__ == "__main__":
         print("Number is not an int of 0-3")
         print(output)
 
+    random = random.uniform(-1, 1)
+
+    print(random)
     # print(nn.W1)
     # print(" ")
     # print(nn.W2)

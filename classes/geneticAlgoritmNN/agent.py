@@ -27,19 +27,26 @@ class Agent:
         hitbox = self.car.generateHitbox()
         return hitbox
 
-    def move(self, dt):
+    def move(self, dt, vertices):
         if self.step < self.maxStep:
-            inputnn = self.car.observation
-            instruction = self.nn.feedforward(inputnn)
+            inputnn = []
+            self.car.mathIntersect(vertices)
+            for point in self.car.circuitIntersections:
+                inputnn.append(abs(self.car.middle - point)) 
+            if len(inputnn) > 5:
+                instruction = self.nn.feedforward(inputnn)
+            else:
+                instruction = 3
+                # print(f"Input: {inputnn}")
             self.step += 1
             
-            self.car.updateGA(dt, instruction)
+            self.car.updateWithInstruction(dt, instruction)
         else:
             self.dead = True
 
-    def update(self, dt):
+    def update(self, dt, vertices):
         if not self.dead:
-            self.move(dt)
+            self.move(dt, vertices)
 
             pos = self.car.position
             if(pos.x < 2 or pos.y < 2 or pos.x > self.window.x-2 or pos.y > self.window.y-2):

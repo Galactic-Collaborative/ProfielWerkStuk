@@ -16,7 +16,7 @@ class Car():
         self.scale = 1.48
         self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
 
-        self.carRotation = Vector2D(1,1)
+        self.carRotation = Vector2D(-1,0)
 
         self.eyesList = [[0, 5000], [5000, 5000], [5000, 0], [5000, -5000], [0, -5000], [-5000, 0]]
         self.hitboxVectors = [
@@ -44,7 +44,6 @@ class Car():
         car = self.drawCar(batch, group, best)
         return car
 
-
     def draw2(self, batch, layers, options="f"):
         
         drawList = [self.drawCar(batch, layers['car']),
@@ -54,14 +53,12 @@ class Car():
 
         return drawList
 
-
     def drawCar(self, batch, group, best=False):
         if self.dead:
             car = pyglet.sprite.Sprite(self.sprites['dead'], x=self.position.x, y=self.position.y, batch=batch, group=group)
             car.opacity = 25
         elif best:
             car = pyglet.sprite.Sprite(self.sprites['best'], x=self.position.x, y=self.position.y, batch=batch, group=group)    
-            car.opacity = 100
         else:
             car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
             car.opacity = 75
@@ -137,26 +134,16 @@ class Car():
                 point = intersect[pointIndex[0]]
                 self.circuitIntersections.append(point)
                 dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
-                #dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
         return dots
 
-    def mathIntersect(self, lines):
+    def mathIntersect(self, vertices):
         self.circuitIntersections = []
         for eyeline in self.generateLines():
-            intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
+            intersect = [l.intersect(eyeline) for l in vertices if l.intersect(eyeline) != None]
             minList = [abs(self.middle - point) for point in intersect]
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 self.circuitIntersections.append(intersect[pointIndex[0]])
-            else:
-                for l in lines:
-                    print(l.intersect(eyeline, debug=True))
-                print(self.position)
-                print(self.velocity)
-                print(self.carRotation.rotation())
-                print(self.acceleration)
-
-
 
     def forward(self):
         self.forces += Vector2D(100,0)

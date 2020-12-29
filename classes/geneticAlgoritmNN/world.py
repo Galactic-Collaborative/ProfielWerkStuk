@@ -26,12 +26,12 @@ class World:
             drawList = car.draw(batch, foreground, background, vertices, self.show)
         return drawList
 
-    def update(self, dt):
-        for car in self.carList:
-            if car.step > self.minStep:
-                car.dead = True
+    def update(self, dt, vertices):
+        for agent in self.carList:
+            if agent.step > self.minStep:
+                agent.dead = True
             else:
-                car.update(dt)
+                agent.update(dt, vertices)
 
     def generateHitbox(self, agent):
         hitbox = agent.generateHitbox()
@@ -49,8 +49,7 @@ class World:
 
     def naturalSelection(self):
         self.gen += 1
-        print(" ")
-        print(" ")
+        print("------------------------------------------------------------------------------------------------------------------------------")
         print(f"NEXT GEN: {self.gen}")
 
         check = []
@@ -86,16 +85,18 @@ class World:
 
     def mutateAll(self):
         for i in range(1, len(self.carList)):
+            print(f"Car: {i}")
             self.carList[i].nn.mutate()
 
     def selectParent(self):
         rand = random.random() * self.fitnessSum
         runningSum = 0
 
-        for car in self.carList:
-            runningSum += car.fitness
+        for agent in self.carList:
+            runningSum += agent.fitness
             if runningSum > rand:
-                return car
+                # print(agent)
+                return agent
         return None
 
     def calcFitnessSum(self):

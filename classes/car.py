@@ -47,7 +47,6 @@ class Car():
         car = self.drawCar(batch, group, best)
         return car
 
-
     def draw2(self, batch, layers, options="f"):
         
         drawList = [self.drawCar(batch, layers['car']),
@@ -56,7 +55,6 @@ class Car():
         ]
 
         return drawList
-
 
     def drawCar(self, batch, group, best=False):
         dList = []
@@ -147,14 +145,13 @@ class Car():
                 point = intersect[pointIndex[0]]
                 self.circuitIntersections.append(point)
                 dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
-                #dots.append(pyglet.shapes.Circle(point.x, point.y, 5, color=(255,0,0), batch=batch, group=group))
         return dots
 
-    def mathIntersect(self, lines):
+    def mathIntersect(self, vertices):
         self.circuitIntersections = []
         n = 0
         for eyeline in self.generateLines():
-            intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
+            intersect = [l.intersect(eyeline) for l in vertices if l.intersect(eyeline) != None]
             minList = [abs(self.position - point) for point in intersect]
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]

@@ -14,8 +14,8 @@ class NeuralNetwork:
     def relu(self, x):
         return np.maximum(0, x)        
 
-    def feedforward(self, X):
-        inputEyes = [100000 if v is None else v for v in X]
+    def feedforward(self, inputnn):
+        inputEyes = [100000 if v is None else v for v in inputnn]
         
         self.dot1 = np.dot(inputEyes, self.weights[0])
         self.activation1 = self.relu(self.dot1)
@@ -75,6 +75,15 @@ if __name__ == "__main__":
     # print(nn2.W2)
     # print(" ")
 
+    nn3 = nn.clone()
+
+    # print(" ")
+    # print("NN3:")
+    # print(nn3.W1)
+    # print(" ")
+    # print(nn3.W2)
+    # print(" ")
+
     nn_input = [5, 3, 5, 1, 7, 8]
 
     output = nn.feedforward(nn_input)
@@ -106,6 +115,9 @@ if __name__ == "__main__":
         print("Number is not an int of 0-3")
         print(output)
 
+    random = random.uniform(-1, 1)
+
+    print(random)
     # print(nn.W1)
     # print(" ")
     # print(nn.W2)

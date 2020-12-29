@@ -47,6 +47,12 @@ def update(dt):
         car.update(dt, key, key_handler)
         circ.carCollidedWithCheckpoint(car)
         hitbox = car.generateHitbox()
+        car.mathIntersect(circ.vertices)
+        circuitIntersections = car.circuitIntersections
+        print(f"Intersections: {circuitIntersections}")
+        print(" ")
+        print(" ")
+        print(" ")
         if circ.collidedWithCar(hitbox) == True:
             car.dead = True
     else:

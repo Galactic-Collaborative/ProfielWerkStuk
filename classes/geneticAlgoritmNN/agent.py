@@ -56,6 +56,7 @@ class Agent:
 
     def calcFitness(self, outsideLines):
         minimum = 100000
+        minLine = None
         for line in outsideLines:
             distance = line.distance(self.car.position)
             if distance < minimum:

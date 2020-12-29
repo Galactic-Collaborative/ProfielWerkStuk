@@ -39,6 +39,7 @@ def on_draw():
 def update(dt):
     window.push_handlers(key_handler)
     carList = world.carList
+    print(carList[0].step)
     if(world.allCarsDead()):
         world.calcFitness(circ.outerLines)
         world.naturalSelection()
@@ -55,7 +56,7 @@ def update(dt):
 
         for agent in carList:
             hitbox = world.generateHitbox(agent)
-            agent.car.currentCheckpoint = circ.carCollidedWithCheckpoint(agent.car)
+            agent.car.currentCheckpoint = circ.getCurrentCheckpoint(agent.car)
             if circ.collidedWithCar(hitbox) == True:
                 agent.dead = True
         

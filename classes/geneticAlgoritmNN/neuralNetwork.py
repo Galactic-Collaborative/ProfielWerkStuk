@@ -57,7 +57,7 @@ class NeuralNetwork:
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
 
-        self.weights = np.array([self.W1, self.W2], dtype=np.float32)
+        self.weights = np.array(np.random.randn(self.inputSize, self.hiddenSize), np.random.randn(self.hiddenSize, self.outputSize), dtype=np.float32)
 
     def relu(self, x):
         return np.maximum(0, x)        

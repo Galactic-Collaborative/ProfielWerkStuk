@@ -100,6 +100,10 @@ def collect_step(environment, policy, buffer):
   # Add trajectory to the replay buffer
   buffer.add_batch(traj)
 
+  # Draw the current situation
+  environment.render('human')
+
+
 def collect_data(env, policy, buffer, steps):
   for _ in range(steps):
     collect_step(env, policy, buffer)
@@ -125,6 +129,7 @@ returns = [avg_return]
 
 for _ in range(num_iterations):
   # Collect a few steps using collect_policy and save to the replay buffer.
+
   collect_data(train_env, agent.collect_policy, replay_buffer, collect_steps_per_iteration)
 
   # Sample a batch of data from the buffer and update the agent's network.
@@ -140,13 +145,4 @@ for _ in range(num_iterations):
     avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
     print('step = {0}: Average Return = {1}'.format(step, avg_return))
     returns.append(avg_return)
-
-### VISUALISATION ###
-window = pyglet.window.Window(resizable=True, fullscreen=True)
-
-@window.event
-def on_draw():
-    train_env.draw()
-
-if __name__ == "__main__":
-    pyglet.app.run()
+    

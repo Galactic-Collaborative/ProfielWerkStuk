@@ -1,7 +1,4 @@
-from __future__ import annotations
 from math import atan, sqrt
-
-from numpy.core.numeric import True_
 if __name__ == "__main__":
     from improvedLine import linline
     from Vector import Vector2D
@@ -33,7 +30,7 @@ class circuit():
 
 
     @classmethod
-    def fromFullPoints(cls, points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> circuit:
+    def fromFullPoints(cls, points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> None:
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
@@ -65,22 +62,11 @@ class circuit():
         return False
 
     def carCollidedWithCheckpoint(self, car) -> bool:
-        collided = False
         currentCheckpoint = car.currentCheckpoint
         for line in car.generateHitbox():
-            if (self.checkpoints[currentCheckpoint].intersect(line) != None):
-                collided = True
+            if self.checkpoints[currentCheckpoint].intersect(line) != None:
                 currentCheckpoint = self.spawnNextCheckpoint(currentCheckpoint)
 
-        self.currentCheckpoint = car.currentCheckpoint = currentCheckpoint
-        return collided
-
-    def getCurrentCheckpoint(self, car) -> int:
-        currentCheckpoint = car.currentCheckpoint
-        for line in car.generateHitbox():
-            if (self.checkpoints[currentCheckpoint].intersect(line) != None):
-                currentCheckpoint = self.spawnNextCheckpoint(currentCheckpoint)
-        
         self.currentCheckpoint = car.currentCheckpoint = currentCheckpoint
         return car.currentCheckpoint
 

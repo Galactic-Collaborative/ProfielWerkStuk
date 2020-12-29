@@ -7,7 +7,9 @@ class NeuralNetwork:
         self.outputSize = 4
         self.hiddenSize = 16  
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
-        self.W2 = np.random.randn(self.hiddenSize, self.outputSize) 
+        self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
+
+        self.weights = np.array(np.random.randn(self.inputSize, self.hiddenSize), np.random.randn(self.hiddenSize, self.outputSize), dtype=np.float32)
 
     def relu(self, x):
         return np.maximum(0, x)        
@@ -15,9 +17,9 @@ class NeuralNetwork:
     def feedforward(self, X):
         inputEyes = [100000 if v is None else v for v in X]
         
-        self.dot1 = np.dot(inputEyes, self.W1)
+        self.dot1 = np.dot(inputEyes, self.weights[0])
         self.activation1 = self.relu(self.dot1)
-        self.dot2 = np.dot(self.activation1, self.W2)
+        self.dot2 = np.dot(self.activation1, self.weights[1])
         self.activation2 = self.relu(self.dot2)
 
         max_output = max(self.activation2)
@@ -26,23 +28,24 @@ class NeuralNetwork:
         return instruction
 
     def saveWeights(self):
-        np.savetxt("w1.txt", self.W1, fmt="%s")
-        np.savetxt("w2.txt", self.W2, fmt="%s")
+        np.savetxt("w1.txt", self.weights[0], fmt="%s")
+        np.savetxt("w2.txt", self.weights[1], fmt="%s")
 
     def clone(self):
         clone = NeuralNetwork()
         clone.W1 = self.W1
         clone.W2 = self.W2
+        clone.weights = self.weights
         return clone
 
     def mutate(self):
         mutationRate = 0.01
-        for weight in [self.W1, self.W2]:
+        for weight in self.weights:
             for i in range(weight.shape[0]):
                 for j in range(weight.shape[1]):
                     rand = random.random()
                     if(rand < mutationRate):
-                        weight[i][j] = np.random.randn()
+                        weight[i,j] += random.uniform(-1, 1)
 
 if __name__ == "__main__":
     nn = NeuralNetwork()

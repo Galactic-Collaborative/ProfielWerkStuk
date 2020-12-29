@@ -1,27 +1,23 @@
+from typing import List
 import pyglet
 import math
 from classes.improvedLine import linline
 from classes.Vector import Vector2D
 
 class Car():
-    def __init__(self, x: int, y: int):
+    def __init__(self, mass):
         self.mass = 1
         self.forces = Vector2D(0,0)
-        self.carRotation = Vector2D(-1,0)
         self.acceleration = Vector2D(0,0)
-        self.velocity = self.carRotation * 10**-3
+        self.velocity = Vector2D(0,0)
         self.startPosition = Vector2D(x, y)
         self.position = Vector2D(x, y)
-        
+
         self.sprites = {"alive": pyglet.resource.image('img/car.png'),"best": pyglet.resource.image('img/carBest.png'),"dead": pyglet.resource.image('img/carCrash.png')}
-        for k, v in self.sprites.items():
-            sprite = v
-            sprite.anchor_x = v.width/2
-            sprite.anchor_y = v.height/2
-            self.sprites[k] = sprite
-        
         self.scale = 1.48
         self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
+
+        self.carRotation = Vector2D(1,1)
 
         self.eyesList = [[0, 5000], [5000, 5000], [5000, 0], [5000, -5000], [0, -5000], [-5000, 0]]
         self.hitboxVectors = [
@@ -59,28 +55,24 @@ class Car():
 
 
     def drawCar(self, batch, group, best=False):
-        dList = []
-        
         if self.dead:
-            image = self.sprites['dead']
-            opacity = 25
+            car = pyglet.sprite.Sprite(self.sprites['dead'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+            car.opacity = 25
         elif best:
-            image = self.sprites['best']
-            opacity = 100
+            car = pyglet.sprite.Sprite(self.sprites['best'], x=self.position.x, y=self.position.y, batch=batch, group=group)    
+            car.opacity = 100
         else:
-            image = self.sprites['alive']
-            opacity = 75
-        
-        car = pyglet.sprite.Sprite(image, x=self.position.x, y=self.position.y, batch=batch, group=group)
+            car = pyglet.sprite.Sprite(self.sprites['alive'], x=self.position.x, y=self.position.y, batch=batch, group=group)
+            car.opacity = 75
         
         #### NOOOO I WANT TO SEE MY FREAKING CAR 
-        car.opacity = opacity
+        car.opacity = 100
 
         car.scale = self.scale
+        car.anchor_x = car.width / 2
+        car.anchor_y = car.height / 2
         car.rotation = -(self.carRotation.rotation())
-        
-        dList.append(car)
-        return dList
+        return car
 
     def eyes(self, batch, group):
         eyes = self.drawEyes(batch, group)
@@ -99,8 +91,8 @@ class Car():
         eyePoints = [Vector2D(i[0],i[1]) for i in self.eyesList]
 
         for line in eyePoints:
-            secondPosition = self.position + line.rotate(self.carRotation.rotation())
-            lines.append(linline.fromPoints(self.position, secondPosition))
+            secondPosition = self.middle + line.rotate(self.carRotation.rotation())
+            lines.append(linline.fromPoints(self.middle, secondPosition))
 
         self.lines = lines
         return lines
@@ -119,7 +111,7 @@ class Car():
 
         rotation = self.carRotation.rotation()
 
-        points = [point.rotate(rotation, in_place=False) + self.position for point in self.hitboxVectors]
+        points = [point.rotate(rotation, in_place=False) + self.middle for point in self.hitboxVectors]
         for i in range(len(points)):
             l = linline.fromPoints(points[i-1], points[i])
             l.color = lineColor[i]
@@ -131,7 +123,7 @@ class Car():
         observations = [abs(self.velocity), abs(self.acceleration)]
         
         for point in self.circuitIntersections:
-            observations.append(abs(self.position - point))
+            observations.append(abs(self.middle - point))
         
         return observations
         
@@ -141,7 +133,7 @@ class Car():
 
         for n, eyeline in enumerate(self.lines):
             intersect = [w for l in lines if (w:=l.intersect(eyeline)) != None]
-            minList = [abs(self.position - point) for point in intersect]
+            minList = [abs(self.middle - point) for point in intersect]
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 point = intersect[pointIndex[0]]
@@ -152,22 +144,19 @@ class Car():
 
     def mathIntersect(self, lines):
         self.circuitIntersections = []
-        n = 0
         for eyeline in self.generateLines():
             intersect = [l.intersect(eyeline) for l in lines if l.intersect(eyeline) != None]
-            minList = [abs(self.position - point) for point in intersect]
+            minList = [abs(self.middle - point) for point in intersect]
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 self.circuitIntersections.append(intersect[pointIndex[0]])
             else:
-                print("==========================")
-                print(f"{n} => {self.eyesList[n]}")
-                print(eyeline)
+                for l in lines:
+                    print(l.intersect(eyeline, debug=True))
                 print(self.position)
                 print(self.velocity)
                 print(self.carRotation.rotation())
                 print(self.acceleration)
-            n += 1
 
 
 
@@ -211,7 +200,6 @@ class Car():
         elif None:
             pass
         else:
-            print(instruction)
             print("Notice: UpdateWithInstruction() can only handle ints from 0 to 3")
         
         self._calculatePhysics(dt)
@@ -241,7 +229,6 @@ class Car():
         self.middle = self.position + Vector2D.fromTuple(self.image_dimensions).rotate(self.carRotation.rotation()) * self.scale * 0.5
         
     def reset(self):
-        self.currentCheckpoint = 0
         self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)
         self.velocity = Vector2D(0,0)

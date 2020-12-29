@@ -27,19 +27,25 @@ class Agent:
         hitbox = self.car.generateHitbox()
         return hitbox
 
-    def move(self, dt):
+    def move(self, vertices, dt):
         if self.step < self.maxStep:
-            inputnn = self.car.observation
-            instruction = self.nn.feedforward(inputnn)
             self.step += 1
-            
-            self.car.updateGA(dt, instruction)
+            self.car.updateWithInstruction(dt, self.predict(vertices))
         else:
             self.dead = True
 
-    def update(self, dt):
+    def predict(self, vertices):
+        self.car.mathIntersect(vertices)
+
+        inputnn = []
+        for point in self.car.circuitIntersections:
+            inputnn.append(abs(self.car.middle - point)) 
+        
+        return self.nn.feedforward(inputnn)
+
+    def update(self, vertices, dt):
         if not self.dead:
-            self.move(dt)
+            self.move(vertices, dt)
 
             pos = self.car.position
             if(pos.x < 2 or pos.y < 2 or pos.x > self.window.x-2 or pos.y > self.window.y-2):
@@ -49,6 +55,7 @@ class Agent:
 
     def calcFitness(self, outsideLines):
         minimum = 100000
+        minLine = None
         for line in outsideLines:
             distance = line.distance(self.car.position)
             if distance < minimum:

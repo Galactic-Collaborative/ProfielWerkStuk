@@ -16,11 +16,11 @@ class Agent:
     def draw(self, batch, foreground, background, vertices, show):
         car = self.car.draw(batch, foreground, self.bestCar)
         intersectEyes = self.car.intersectEyes(batch, vertices, background)
-        if show or not self.dead:
-            eyes = self.car.eyes(batch, background)
+        #if show or not self.dead:
+        #    eyes = self.car.eyes(batch, background)
             # hitbox = self.car.hitbox(batch, background)
             # return car, intersectEyes, eyes, hitbox
-            return car, intersectEyes, eyes
+        #    return car, intersectEyes, eyes
         return car, intersectEyes
 
     def generateHitbox(self):

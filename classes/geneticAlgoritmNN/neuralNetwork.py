@@ -36,18 +36,22 @@ class NeuralNetwork:
         return clone
 
     def mutate(self):
-        mutationRate = 1
-        for weight in [self.W1, self.W2]:
-            for i in range(weight.shape[0]):
-                for j in range(weight.shape[1]):
-                    rand = random.random()
-                    if(rand < mutationRate):
-                        weight[i][j] += random.uniform(-1, 1)
+        self.mutateFunction(self.W1)
+        self.mutateFunction(self.W2)
 
-        for weight in self.W1:
+        # for weight in [self.W1, self.W2]:
+        #     for i in range(weight.shape[0]):
+        #         for j in range(weight.shape[1]):
+        #             rand = random.random()
+        #             if(rand < mutationRate):
+        #                 weight[i][j] += random.uniform(-1, 1)
+
+    def mutateFunction(self, weight):
+        mutationRate = 1
+        for i in range(len(weight)):
             rand = random.random()
             if(rand < mutationRate):
-                self.W1 += random.uniform(-1, 1)
+                weight[i] += random.uniform(-1, 1)
 
 if __name__ == "__main__":
     nn = NeuralNetwork()
@@ -93,29 +97,17 @@ if __name__ == "__main__":
 
     if output == output2:
         print("True")
-    if output == 0:
-        print(0)
-    elif output == 1:
-        print(1)
-    elif output == 2:
-        print(2)
-    elif output == 3:
-        print(3)
+    if output == 0 or output == 1 or output == 2 or output == 3:
+        print(output)
     else:
         print("Number is not an int of 0-3")
         print(output)
 
-    if output2 == 0:
-        print(0)
-    elif output2 == 1:
-        print(1)
-    elif output2 == 2:
-        print(2)
-    elif output2 == 3:
-        print(3)
+    if output2 == 0 or output2 == 1 or output2 == 2 or output2 == 3:
+        print(output2)
     else:
         print("Number is not an int of 0-3")
-        print(output)
+        print(output2)
 
     random = random.uniform(-1, 1)
 

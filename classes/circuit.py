@@ -1,7 +1,4 @@
 from __future__ import annotations
-from math import atan, sqrt
-
-from numpy.core.numeric import True_
 if __name__ == "__main__":
     from improvedLine import linline
     from Vector import Vector2D
@@ -9,7 +6,6 @@ else:
     from classes.improvedLine import linline
     from classes.Vector import Vector2D
 
-import math
 import pyglet
 
 from typing import List

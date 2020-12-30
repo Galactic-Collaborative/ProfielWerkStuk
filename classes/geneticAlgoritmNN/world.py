@@ -87,6 +87,10 @@ class World:
         for i in range(1, len(self.carList)):
             print(f"Car: {i}")
             self.carList[i].nn.mutate()
+        
+        print("==========================================")
+        for car in self.carList:
+            print(car.nn.weights[1])
 
     def selectParent(self):
         rand = random.random() * self.fitnessSum

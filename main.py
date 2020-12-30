@@ -23,7 +23,7 @@ circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1
 for line in circ.vertices:
     print(line)
 
-car = Car(300,200)
+car = Car(circ.startingPoint.x,circ.startingPoint.y)
 car.position = circ.startingPoint
 
 batch = pyglet.graphics.Batch()
@@ -48,13 +48,10 @@ def update(dt):
         circ.carCollidedWithCheckpoint(car)
         hitbox = car.generateHitbox()
         car.mathIntersect(circ.vertices)
-        circuitIntersections = car.circuitIntersections
-        print(f"Intersections: {circuitIntersections}")
-        print(" ")
-        print(" ")
-        print(" ")
         if circ.collidedWithCar(hitbox) == True:
             car.dead = True
+            circ.reset()
+            car.reset()
     else:
         pyglet.app.exit()
 

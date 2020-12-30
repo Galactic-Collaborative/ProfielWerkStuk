@@ -9,7 +9,7 @@ class NeuralNetwork:
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
 
-        self.weights = np.array(np.random.randn(self.inputSize, self.hiddenSize), np.random.randn(self.hiddenSize, self.outputSize), dtype=np.float32)
+        self.weights = [np.random.randn(self.inputSize, self.hiddenSize), np.random.randn(self.hiddenSize, self.outputSize)]
 
     def relu(self, x):
         return np.maximum(0, x)        
@@ -33,19 +33,17 @@ class NeuralNetwork:
 
     def clone(self):
         clone = NeuralNetwork()
-        clone.W1 = self.W1
-        clone.W2 = self.W2
-        clone.weights = self.weights
+        clone.weights = [np.copy(self.weights[0]),np.copy(self.weights[1])]
         return clone
 
     def mutate(self):
-        mutationRate = 0.01
-        for weight in self.weights:
-            for i in range(weight.shape[0]):
-                for j in range(weight.shape[1]):
+        mutationRate = 0.1
+        for num in range(len(self.weights)):
+            for i in range(self.weights[num].shape[0]):
+                for j in range(self.weights[num].shape[1]):
                     rand = random.random()
                     if(rand < mutationRate):
-                        weight[i,j] += random.uniform(-1, 1)
+                        self.weights[num][i,j] += random.uniform(-1, 1)
 
 if __name__ == "__main__":
     nn = NeuralNetwork()

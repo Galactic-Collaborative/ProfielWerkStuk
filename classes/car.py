@@ -72,7 +72,7 @@ class Car():
         car = pyglet.sprite.Sprite(image, x=self.position.x, y=self.position.y, batch=batch, group=group)
         
         #### NOOOO I WANT TO SEE MY FREAKING CAR 
-        car.opacity = opacity
+        car.opacity = 255
 
         car.scale = self.scale
         car.rotation = -(self.carRotation.rotation())
@@ -241,5 +241,5 @@ class Car():
         self.currentCheckpoint = 0
         self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)
-        self.velocity = Vector2D(0,0)
+        self.velocity = Vector2D(-1*10**-3,0)
         self.position = self.startPosition.copy()

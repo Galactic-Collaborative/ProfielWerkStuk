@@ -20,9 +20,6 @@ for i, checkpoint in enumerate(checkpoints):
 
 circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1), window=window.get_size())
 
-for line in circ.vertices:
-    print(line)
-
 car = Car(300,200)
 car.position = circ.startingPoint
 
@@ -49,10 +46,6 @@ def update(dt):
         hitbox = car.generateHitbox()
         car.mathIntersect(circ.vertices)
         circuitIntersections = car.circuitIntersections
-        print(f"Intersections: {circuitIntersections}")
-        print(" ")
-        print(" ")
-        print(" ")
         if circ.collidedWithCar(hitbox) == True:
             car.dead = True
     else:

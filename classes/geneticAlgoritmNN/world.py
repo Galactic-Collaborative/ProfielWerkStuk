@@ -69,15 +69,15 @@ class World:
         self.calcFitnessSum()
 
         nextGen.append(self.carList[self.bestCar].clone(self.carX, self.carY, best=True))
-        # for _ in range(1, len(self.carList)):
-        #     parent = self.selectParent()
-        #     if parent == None:
-        #         nextGen.append(Agent(self.carX, self.carY, window=self.window, best=False))
-        #     else:
-        #         nextGen.append(parent.clone(self.carX, self.carY, best=False))
-
         for _ in range(1, len(self.carList)):
-            nextGen.append(self.carList[self.bestCar].clone(self.carX, self.carY, best=False))
+            parent = self.selectParent()
+            if parent == None:
+                nextGen.append(Agent(self.carX, self.carY, window=self.window, best=False))
+            else:
+                nextGen.append(parent.clone(self.carX, self.carY, best=False))
+
+        # for _ in range(1, len(self.carList)):
+        #     nextGen.append(self.carList[self.bestCar].clone(self.carX, self.carY, best=False))
 
         self.carList.clear()
         self.carList = nextGen[:]

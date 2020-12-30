@@ -197,7 +197,6 @@ class Car():
         elif None:
             pass
         else:
-            print(instruction)
             print("Notice: UpdateWithInstruction() can only handle ints from 0 to 3")
         
         self._calculatePhysics(dt)
@@ -227,6 +226,7 @@ class Car():
         self.middle = self.position + Vector2D.fromTuple(self.image_dimensions).rotate(self.carRotation.rotation()) * self.scale * 0.5
         
     def reset(self):
+        print("Resetting Car")
         self.currentCheckpoint = 0
         self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)

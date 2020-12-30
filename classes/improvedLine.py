@@ -57,8 +57,8 @@ class linline:
 
         r = point1 - point2
         n = r.toNormalVector()
-        a = n.x
-        b = n.y
+        a = round(n.x,3)
+        b = round(n.y,3)
         c = n @ point1
         
         limit = [point1.x, point2.x] if b != 0 else [point1.y, point2.y]
@@ -208,7 +208,7 @@ class linline:
         return line
 
     def __str__(self):
-        return f"{self.a}x + {self.b}y = {self.c} {self.limit}"
+        return f"{self.a:.2f}x + {self.b:.2f}y = {self.c:.2f} {self.limit}"
     
     def __repr__(self):
         return f"linline({self.a}x + {self.b}y = {self.c} , limit={self.limit})"

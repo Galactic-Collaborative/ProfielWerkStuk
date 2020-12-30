@@ -158,6 +158,7 @@ class circuit():
         return (vertices, checkpoints)
     
     def reset(self):
+        print("Resetting Circuit")
         self.currentCheckpoint = 0;
 
 

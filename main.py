@@ -20,9 +20,6 @@ for i, checkpoint in enumerate(checkpoints):
 
 circ = circuit.fromFullPoints([inner, outer], circuit_checkpoints, Vector2D(12,1), window=window.get_size())
 
-for line in circ.vertices:
-    print(line)
-
 car = Car(circ.startingPoint.x,circ.startingPoint.y)
 car.position = circ.startingPoint
 

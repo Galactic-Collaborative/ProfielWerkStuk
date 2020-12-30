@@ -61,18 +61,19 @@ class Car():
         
         if self.dead:
             image = self.sprites['dead']
-            opacity = 25
+            opacity = 75
         elif best:
             image = self.sprites['best']
-            opacity = 100
+            opacity = 255
         else:
             image = self.sprites['alive']
-            opacity = 75
+            opacity = 150
         
         car = pyglet.sprite.Sprite(image, x=self.position.x, y=self.position.y, batch=batch, group=group)
         
         #### NOOOO I WANT TO SEE MY FREAKING CAR 
-        car.opacity = 255
+        #car.opacity = 255
+        car.opacity = opacity
 
         car.scale = self.scale
         car.rotation = -(self.carRotation.rotation())

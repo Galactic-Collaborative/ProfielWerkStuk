@@ -1,6 +1,54 @@
 import numpy as np
 import random
 
+# class NeuralNetwork:
+#     def __init__(self):
+#         self.inputSize = 6
+#         self.outputSize = 4
+#         self.hiddenSize = 16  
+#         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
+#         self.W2 = np.random.randn(self.hiddenSize, self.outputSize) 
+
+#     def relu(self, x):
+#         return np.maximum(0, x)        
+
+#     def feedforward(self, inputnn):
+#         inputEyes = [100000 if v is None else v for v in inputnn]
+        
+#         self.dot1 = np.dot(inputEyes, self.W1)
+#         self.activation1 = self.relu(self.dot1)
+#         self.dot2 = np.dot(self.activation1, self.W2)
+#         self.activation2 = self.relu(self.dot2)
+
+#         max_output = max(self.activation2)
+#         index = np.where(self.activation2 == max_output)
+#         instruction = index[0][0]
+#         return instruction
+
+#     def saveWeights(self):
+#         np.savetxt("w1.txt", self.W1, fmt="%s")
+#         np.savetxt("w2.txt", self.W2, fmt="%s")
+
+#     def clone(self):
+#         clone = NeuralNetwork()
+#         clone.W1 = self.W1
+#         clone.W2 = self.W2
+#         return clone
+
+#     def mutate(self):
+#         mutationRate = 1
+#         for weight in [self.W1, self.W2]:
+#             for i in range(weight.shape[0]):
+#                 for j in range(weight.shape[1]):
+#                     rand = random.random()
+#                     if(rand < mutationRate):
+#                         weight[i][j] += random.uniform(-1, 1)
+
+#         for weight in self.W1:
+#             rand = random.random()
+#             if(rand < mutationRate):
+#                 self.W1 += random.uniform(-1, 1)
+
 class NeuralNetwork:
     def __init__(self):
         self.inputSize = 6
@@ -14,8 +62,8 @@ class NeuralNetwork:
     def relu(self, x):
         return np.maximum(0, x)        
 
-    def feedforward(self, inputnn):
-        inputEyes = [100000 if v is None else v for v in inputnn]
+    def feedforward(self, X):
+        inputEyes = [100000 if v is None else v for v in X]
         
         self.dot1 = np.dot(inputEyes, self.weights[0])
         self.activation1 = self.relu(self.dot1)

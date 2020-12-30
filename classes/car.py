@@ -149,24 +149,12 @@ class Car():
 
     def mathIntersect(self, vertices):
         self.circuitIntersections = []
-        n = 0
         for eyeline in self.generateLines():
             intersect = [l.intersect(eyeline) for l in vertices if l.intersect(eyeline) != None]
             minList = [abs(self.position - point) for point in intersect]
             if len(minList):
                 pointIndex = [i for i, j in enumerate(minList) if j == min(minList)]
                 self.circuitIntersections.append(intersect[pointIndex[0]])
-            else:
-                print("==========================")
-                print(f"{n} => {self.eyesList[n]}")
-                print(eyeline)
-                print(self.position)
-                print(self.velocity)
-                print(self.carRotation.rotation())
-                print(self.acceleration)
-            n += 1
-
-
 
     def forward(self):
         self.forces += Vector2D(100,0)

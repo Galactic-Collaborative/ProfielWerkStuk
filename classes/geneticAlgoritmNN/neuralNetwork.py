@@ -1,73 +1,23 @@
 import numpy as np
 import random
 
-# class NeuralNetwork:
-#     def __init__(self):
-#         self.inputSize = 6
-#         self.outputSize = 4
-#         self.hiddenSize = 16  
-#         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
-#         self.W2 = np.random.randn(self.hiddenSize, self.outputSize) 
-
-#     def relu(self, x):
-#         return np.maximum(0, x)        
-
-#     def feedforward(self, inputnn):
-#         inputEyes = [100000 if v is None else v for v in inputnn]
-        
-#         self.dot1 = np.dot(inputEyes, self.W1)
-#         self.activation1 = self.relu(self.dot1)
-#         self.dot2 = np.dot(self.activation1, self.W2)
-#         self.activation2 = self.relu(self.dot2)
-
-#         max_output = max(self.activation2)
-#         index = np.where(self.activation2 == max_output)
-#         instruction = index[0][0]
-#         return instruction
-
-#     def saveWeights(self):
-#         np.savetxt("w1.txt", self.W1, fmt="%s")
-#         np.savetxt("w2.txt", self.W2, fmt="%s")
-
-#     def clone(self):
-#         clone = NeuralNetwork()
-#         clone.W1 = self.W1
-#         clone.W2 = self.W2
-#         return clone
-
-#     def mutate(self):
-#         mutationRate = 1
-#         for weight in [self.W1, self.W2]:
-#             for i in range(weight.shape[0]):
-#                 for j in range(weight.shape[1]):
-#                     rand = random.random()
-#                     if(rand < mutationRate):
-#                         weight[i][j] += random.uniform(-1, 1)
-
-#         for weight in self.W1:
-#             rand = random.random()
-#             if(rand < mutationRate):
-#                 self.W1 += random.uniform(-1, 1)
-
 class NeuralNetwork:
     def __init__(self):
         self.inputSize = 6
         self.outputSize = 4
         self.hiddenSize = 16  
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
-        self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
-
-        self.weights = [np.random.randn(self.inputSize, self.hiddenSize), np.random.randn(self.hiddenSize, self.outputSize)]
+        self.W2 = np.random.randn(self.hiddenSize, self.outputSize) 
 
     def relu(self, x):
         return np.maximum(0, x)        
 
-    def feedforward(self, X):
-        inputEyes = [100000 if v is None else v for v in X]
+    def feedforward(self, inputnn):
+        inputEyes = [100000 if v is None else v for v in inputnn]
         
-        self.dot1 = np.dot(inputEyes, self.weights[0])
+        self.dot1 = np.dot(inputEyes, self.W1)
         self.activation1 = self.relu(self.dot1)
-        self.dot2 = np.dot(self.activation1, self.weights[1])
+        self.dot2 = np.dot(self.activation1, self.W2)
         self.activation2 = self.relu(self.dot2)
 
         max_output = max(self.activation2)
@@ -76,22 +26,32 @@ class NeuralNetwork:
         return instruction
 
     def saveWeights(self):
-        np.savetxt("w1.txt", self.weights[0], fmt="%s")
-        np.savetxt("w2.txt", self.weights[1], fmt="%s")
+        np.savetxt("w1.txt", self.W1, fmt="%s")
+        np.savetxt("w2.txt", self.W2, fmt="%s")
 
     def clone(self):
         clone = NeuralNetwork()
-        clone.weights = [np.copy(self.weights[0]),np.copy(self.weights[1])]
+        clone.W1 = np.copy(self.W1)
+        clone.W2 = np.copy(self.W2)
         return clone
 
     def mutate(self):
-        mutationRate = 0.1
-        for num in range(len(self.weights)):
-            for i in range(self.weights[num].shape[0]):
-                for j in range(self.weights[num].shape[1]):
-                    rand = random.random()
-                    if(rand < mutationRate):
-                        self.weights[num][i,j] += random.uniform(-1, 1)
+        self.mutateFunction(self.W1)
+        self.mutateFunction(self.W2)
+
+        # for weight in [self.W1, self.W2]:
+        #     for i in range(weight.shape[0]):
+        #         for j in range(weight.shape[1]):
+        #             rand = random.random()
+        #             if(rand < mutationRate):
+        #                 weight[i][j] += random.uniform(-1, 1)
+
+    def mutateFunction(self, weight):
+        mutationRate = 1
+        for i in range(len(weight)):
+            rand = random.random()
+            if(rand < mutationRate):
+                weight[i] += random.uniform(-1, 1)
 
 if __name__ == "__main__":
     nn = NeuralNetwork()
@@ -137,29 +97,17 @@ if __name__ == "__main__":
 
     if output == output2:
         print("True")
-    if output == 0:
-        print(0)
-    elif output == 1:
-        print(1)
-    elif output == 2:
-        print(2)
-    elif output == 3:
-        print(3)
+    if output == 0 or output == 1 or output == 2 or output == 3:
+        print(output)
     else:
         print("Number is not an int of 0-3")
         print(output)
 
-    if output2 == 0:
-        print(0)
-    elif output2 == 1:
-        print(1)
-    elif output2 == 2:
-        print(2)
-    elif output2 == 3:
-        print(3)
+    if output2 == 0 or output2 == 1 or output2 == 2 or output2 == 3:
+        print(output2)
     else:
         print("Number is not an int of 0-3")
-        print(output)
+        print(output2)
 
     random = random.uniform(-1, 1)
 

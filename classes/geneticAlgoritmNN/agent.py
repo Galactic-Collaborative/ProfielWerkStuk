@@ -1,5 +1,7 @@
 from classes.car import Car
 from classes.geneticAlgoritmNN.neuralNetwork import NeuralNetwork
+from classes.improvedLine import linline
+from classes.Vector import Vector2D
 
 class Agent:
     def __init__(self, carX, carY, window, best=False):
@@ -37,7 +39,7 @@ class Agent:
                 instruction = self.nn.feedforward(inputnn)
             else:
                 instruction = 3
-                # print(f"Input: {inputnn}")
+                print(f"Input: {inputnn}")
             self.step += 1
             
             self.car.updateWithInstruction(dt, instruction)
@@ -54,18 +56,40 @@ class Agent:
         else:
             self.car.dead = self.dead
 
-    def calcFitness(self, outsideLines):
-        minimum = 100000
-        minLine = None
-        for line in outsideLines:
-            distance = line.distance(self.car.position)
-            if distance < minimum:
-                minimum = distance
-                minLine = line
+    def calcFitness(self, outsideLines):        
+        if self.car.currentCheckpoint > 0:
+            minimum = 100000
+            minLine = None
+            for line in outsideLines:
+                distance = line.distance(self.car.position)
+                if distance < minimum:
+                    minimum = distance
+                    minLine = line
         
-        index = outsideLines.index(minLine)
-        if self.car.currentCheckpoint != 0:
-            self.fitness = (self.car.currentCheckpoint*100) + (index*100)/(self.step**2)
+            index = outsideLines.index(minLine)
+            lineToOutside = linline.fromVector(minLine.n, self.car.position) #BC
+            intersection = lineToOutside.intersect(minLine) #B
+            startPointLine = Vector2D(minLine.limit[0],minLine.calcY(minLine.limit[0])) #A
+            print(" ")
+            print(minLine)
+            if startPointLine.y == None: 
+                print("StartPointLine Y is None")
+                distanceLine = 0
+            elif startPointLine.x == None:
+                print("StartPointLine X is None")
+                distanceLine = 0
+            elif intersection.y == None:
+                print("Intersection Y is None")
+                distanceLine = 0
+            elif intersection.x == None:
+                print("Intersection X is None")
+                distanceLine = 0
+            else:
+                distanceLine = intersection - startPointLine #AB
+###kijken welke - welke moet
+            print(" ")
+            print(" ")
+            self.fitness = (self.car.currentCheckpoint*100) + ((index*100)+(abs(distanceLine)*100))/(self.step**2)
         else:
             self.fitness = 0
 

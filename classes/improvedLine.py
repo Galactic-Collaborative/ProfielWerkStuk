@@ -62,7 +62,7 @@ class linline:
         c = n @ point1
         
         limit = [point1.x, point2.x] if b != 0 else [point1.y, point2.y]
-        return cls(a,b,c, limit=sorted(limit))
+        return cls(a,b,c, limit=limit)
 
     def intersect(self, other, debug=False) -> Vector2D: # TODO
         """Calculate the point on which the two lines intersect
@@ -156,7 +156,8 @@ class linline:
             else:
                 checkedVar = x
 
-            collided = (line.limit[0] <= checkedVar <= line.limit[1])
+            limit = sorted(line.limit)
+            collided = (limit[0] <= checkedVar <= limit[1])
             if __name__ == "__main__":
                 print(line1)
                 print(line2)

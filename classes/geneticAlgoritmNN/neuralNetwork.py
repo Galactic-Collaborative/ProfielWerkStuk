@@ -3,7 +3,7 @@ import random
 
 class NeuralNetwork:
     def __init__(self):
-        self.inputSize = 6
+        self.inputSize = 8
         self.outputSize = 4
         self.hiddenSize = 16  
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)

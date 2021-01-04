@@ -2,6 +2,7 @@ import random
 from random import sample
 from classes.Vector import Vector2D
 from classes.geneticAlgoritmNN.agent import Agent
+from pyglet import shapes
 
 class World:
     def __init__(self, cars, carX, carY, window, load=False) -> None:
@@ -17,6 +18,7 @@ class World:
         self.gen = 1
 
         self.bestCar = 0
+        self.bestCarPosition = Vector2D(0,0)
 
         self.maxStep = 1000
         self.load = load
@@ -28,6 +30,11 @@ class World:
             car = self.carList[self.bestCar]
             drawList = car.draw(batch, foreground, background, vertices, self.show)
         return drawList
+    
+    def drawBestCarPlace(self, batch, bestCarPlace):
+        drawPlace = shapes.Circle(self.bestCarPosition.x,self.bestCarPosition.y,20,color=(0,255,0),batch=batch,group=bestCarPlace)
+        drawPlace.opacity = 200
+        return drawPlace
 
     def update(self, dt, vertices):
         for agent in self.carList:
@@ -129,4 +136,5 @@ class World:
             if(car.fitness > topFitness):
                 topFitness = car.fitness 
                 self.bestCar = i
+        self.bestCarPosition = self.carList[self.bestCar].car.position
         print(f"Best Car: {self.bestCar}")

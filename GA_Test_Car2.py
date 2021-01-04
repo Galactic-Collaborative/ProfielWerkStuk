@@ -68,11 +68,13 @@ def update(dt):
 def render():
     window.clear()
 
+    bestCarPlace = pyglet.graphics.OrderedGroup(3)
     foreground = pyglet.graphics.OrderedGroup(2)
     background = pyglet.graphics.OrderedGroup(1)
     circuitLayer = pyglet.graphics.OrderedGroup(0)
 
     carDrawings = world.draw(batch, foreground, background, circ.vertices)
+    bestCarDrawing = world.drawBestCarPlace(batch, bestCarPlace)
     circuitDraw = circ.draw(batch, window.get_size(), circuitLayer)
     batch.draw()
 

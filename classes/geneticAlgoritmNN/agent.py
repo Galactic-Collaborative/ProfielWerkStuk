@@ -33,9 +33,10 @@ class Agent:
         if self.step < self.maxStep:
             inputnn = []
             self.car.mathIntersect(vertices)
-            for point in self.car.circuitIntersections:
-                inputnn.append(abs(self.car.middle - point)) 
-            if len(inputnn) > 5:
+            inputnn = self.car.observe()
+            #for point in self.car.circuitIntersections:
+            #    inputnn.append(abs(self.car.middle - point)) 
+            if len(inputnn) > 7:
                 instruction = self.nn.feedforward(inputnn)
             else:
                 instruction = 3
@@ -69,27 +70,24 @@ class Agent:
             index = outsideLines.index(minLine)
             lineToOutside = linline.fromVector(minLine.n, self.car.position) #BC
             intersection = lineToOutside.intersect(minLine) #B
-            startPointLine = Vector2D(minLine.limit[0],minLine.calcY(minLine.limit[0])) #A
+            #startPoint = Vector2D(minLine.limit[0],minLine.calcY(minLine.limit[0])) #A
+            startPoint, _ = minLine.getEndPoints()
             print(" ")
             print(minLine)
-            if startPointLine.y == None: 
-                print("StartPointLine Y is None")
+            if startPoint.x == None:
+                print("StartPoint X is None")
                 distanceLine = 0
-            elif startPointLine.x == None:
-                print("StartPointLine X is None")
+            elif startPoint.y == None: 
+                print("StartPoint Y is None")
                 distanceLine = 0
-            elif intersection.y == None:
-                print("Intersection Y is None")
-                distanceLine = 0
-            elif intersection.x == None:
-                print("Intersection X is None")
+            elif intersection == None:
+                print("Intersection is None")
                 distanceLine = 0
             else:
-                distanceLine = intersection - startPointLine #AB
-###kijken welke - welke moet
+                distanceLine = intersection - startPoint #AB
             print(" ")
             print(" ")
-            self.fitness = (self.car.currentCheckpoint*100) + ((index*100)+(abs(distanceLine)*100))/(self.step**2)
+            self.fitness = (self.car.currentCheckpoint*1000) + ((index*100)+abs(distanceLine))/(self.step**2)
         else:
             self.fitness = 0
 

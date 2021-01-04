@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, NewType, Union, Type
+from typing import List, NewType, Union, Type, Tuple
 import math
 from pyglet import shapes
 
@@ -146,6 +146,16 @@ class linline:
             result = None
 
         return result
+
+    def getEndPoints(self) -> Tuple[Vector2D]:
+        if self.b == 0:
+            pointA = Vector2D(self.calcX(self.limit[0]), self.limit[0])
+            pointB = Vector2D(self.calcX(self.limit[1]), self.limit[1])
+        else:
+            pointA = Vector2D(self.limit[0], self.calcY(self.limit[0]))
+            pointB = Vector2D(self.limit[1], self.calcY(self.limit[1]))
+
+        return (pointA, pointB)
 
     @staticmethod
     def _checkDomain(x: float, y: float, line1: linline, line2: linline) -> bool:

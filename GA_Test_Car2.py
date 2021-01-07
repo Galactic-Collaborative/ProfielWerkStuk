@@ -2,6 +2,7 @@ import pyglet
 from classes.geneticAlgoritmNN.world import World
 from classes.circuit import circuit
 from classes.Vector import Vector2D
+from pyglet import clock
 
 ### MAIN LOOP
 window = pyglet.window.Window(resizable=True, fullscreen=True)
@@ -79,5 +80,5 @@ def render():
     batch.draw()
 
 if __name__ == "__main__":
-    pyglet.clock.schedule_interval(update, 1/120.0)
+    pyglet.clock.schedule_interval(update, .140)
     pyglet.app.run()

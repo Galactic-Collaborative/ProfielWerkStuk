@@ -34,8 +34,6 @@ class Agent:
             inputnn = []
             self.car.mathIntersect(vertices)
             inputnn = self.car.observe()
-            #for point in self.car.circuitIntersections:
-            #    inputnn.append(abs(self.car.middle - point)) 
             if len(inputnn) > 7:
                 instruction = self.nn.feedforward(inputnn)
             else:
@@ -70,8 +68,7 @@ class Agent:
             index = outsideLines.index(minLine)
             lineToOutside = linline.fromVector(minLine.n, self.car.position) #BC
             intersection = lineToOutside.intersect(minLine) #B
-            #startPoint = Vector2D(minLine.limit[0],minLine.calcY(minLine.limit[0])) #A
-            startPoint, _ = minLine.getEndPoints()
+            startPoint, _ = minLine.getEndPoints() #A
             print(" ")
             print(minLine)
             if startPoint.x == None:

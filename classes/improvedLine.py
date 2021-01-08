@@ -1,17 +1,9 @@
 from __future__ import annotations
-from typing import List, NewType, Union, Type
+from typing import List, NewType, Tuple, Union, Type
 import math
 from pyglet import shapes
 
-if __name__ == "__main__":
-    debugging = True
-else:
-    debugging = False
-
-if debugging:
-    from Vector import Vector2D
-else:
-    from classes.Vector import Vector2D
+from classes.Vector import Vector2D
 
 class linline:
     """A mathematical representation of a linear line
@@ -23,7 +15,7 @@ class linline:
         self.a = a
         self.b = b
         self.c = c
-        self.r = Vector2D(a,-b)
+        self.r = Vector2D(b,-a)
         self.n = Vector2D(a,b)
         self.limit = limit
         self.color = color
@@ -31,8 +23,8 @@ class linline:
     @classmethod
     def fromVector(cls, direction, location=Vector2D(0,0)):
         a = direction.y
-        b = direction.x
-        c = location.x * a + location.y * b
+        b = -direction.x
+        c = direction.toNormalVector() @ location
         return cls(a,b,c)
     
     @classmethod
@@ -55,14 +47,14 @@ class linline:
         if(type(point2) == tuple):
             point2 = Vector2D.fromTuple(point2)
 
-        r = point1 - point2
+        r = point2 - point1
         n = r.toNormalVector()
         a = round(n.x,3)
         b = round(n.y,3)
         c = n @ point1
         
         limit = [point1.x, point2.x] if b != 0 else [point1.y, point2.y]
-        return cls(a,b,c, limit=sorted(limit))
+        return cls(a,b,c, limit=limit)
 
     def intersect(self, other, debug=False) -> Vector2D: # TODO
         """Calculate the point on which the two lines intersect
@@ -113,7 +105,6 @@ class linline:
                     if debug: print("Domain Error")
                     return None
             else:
-                if debugging: print('Something None')
                 return None
         except ZeroDivisionError:
             print(f"self = {self}\nother = {other}")
@@ -147,6 +138,18 @@ class linline:
 
         return result
 
+    def getEndPoints(self) -> Tuple[Vector2D]:
+        if self.b == 0:
+            pointA = Vector2D(self.calcX(self.limit[0]), self.limit[0])
+            pointB = Vector2D(self.calcX(self.limit[1]), self.limit[1])
+        else:
+            pointA = Vector2D(self.limit[0], self.calcY(self.limit[0]))
+            pointB = Vector2D(self.limit[1], self.calcY(self.limit[1]))
+
+        return (pointA, pointB)
+
+
+
     @staticmethod
     def _checkDomain(x: float, y: float, line1: linline, line2: linline) -> bool:
         collided: bool = False
@@ -156,21 +159,15 @@ class linline:
             else:
                 checkedVar = x
 
-            collided = (line.limit[0] <= checkedVar <= line.limit[1])
-            if __name__ == "__main__":
-                print(line1)
-                print(line2)
-                print(collided)
-            
-            if not collided: 
+            limit = sorted(line.limit)
+            collided = (limit[0] <= checkedVar <= limit[1])
+            if not collided:
                 break
         
         return collided
 
 
     def distance(self, point):
-        # d = (abs(self.a * point.x + self.b * point.y - self.c))/math.sqrt(self.a**2 + self.b**2)
-        # return d 
         d = (abs(self.n @ point - self.c))/abs(self.n)
         return d       
         

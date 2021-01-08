@@ -1,11 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
 import pyglet
-from classes.car import Car
-from classes.circuit import circuit
-from classes.Vector import Vector2D
-from classes.environment import circuitEnv
+# from classes.car import Car
+# from classes.circuit import circuit
+# from classes.Vector import Vector2D
+# from classes.environment import circuitEnv
 
+import gym
 import base64
 import numpy as np
 import pyglet
@@ -14,6 +15,7 @@ import tensorflow as tf
 from tf_agents.agents.dqn import dqn_agent
 from tf_agents.drivers import dynamic_step_driver
 from tf_agents.environments import tf_py_environment
+from tf_agents.environments import suite_gym
 from tf_agents.eval import metric_utils
 from tf_agents.metrics import tf_metrics
 from tf_agents.networks import q_network
@@ -26,18 +28,20 @@ from tf_agents.utils import common
 num_iterations = 20000
 
 initial_collect_steps = 100  
-collect_steps_per_iteration = 1 
+collect_steps_per_iteration = 1
 replay_buffer_max_length = 100000 
 
 batch_size = 64 
 learning_rate = 1e-3
 log_interval = 200 
 
-num_eval_episodes = 10 
+num_eval_episodes = 1 
 eval_interval = 1000 
 
-train_env = tf_py_environment.TFPyEnvironment(circuitEnv())
-eval_env = tf_py_environment.TFPyEnvironment(circuitEnv())
+train_env = tf_py_environment.TFPyEnvironment(suite_gym.load("CarRacing-v0"))
+eval_env = tf_py_environment.TFPyEnvironment(suite_gym.load("CarRacing-v0"))
+
+print(train_env.time_step_spec())
 
 fc_layers_params = (100,)
 q_net = q_network.QNetwork(
@@ -56,6 +60,7 @@ agent = dqn_agent.DqnAgent(
     optimizer=optimizer,
     td_errors_loss_fn=common.element_wise_squared_loss,
     train_step_counter=train_step_counter,
+    epsilon_greedy=0.3
 )
 agent.initialize()
 
@@ -86,6 +91,7 @@ def compute_avg_return(environment, policy, num_episodes=10):
       action_step = policy.action(time_step)
       time_step = environment.step(action_step.action)
       episode_return += time_step.reward
+      environment.render('human')
     total_return += episode_return
 
   avg_return = total_return / num_episodes
@@ -127,9 +133,8 @@ agent.train_step_counter.assign(0)
 avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
 returns = [avg_return]
 
-for _ in range(num_iterations):
+while True:
   # Collect a few steps using collect_policy and save to the replay buffer.
-
   collect_data(train_env, agent.collect_policy, replay_buffer, collect_steps_per_iteration)
 
   # Sample a batch of data from the buffer and update the agent's network.
@@ -142,6 +147,7 @@ for _ in range(num_iterations):
     print('step = {0}: loss = {1}'.format(step, train_loss))
 
   if step % eval_interval == 0:
+    print("Computing average return -- Please wait")
     avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
     print('step = {0}: Average Return = {1}'.format(step, avg_return))
     returns.append(avg_return)

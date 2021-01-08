@@ -1,36 +1,76 @@
-from math import atan, sqrt
-if __name__ == "__main__":
-    from improvedLine import linline
-    from Vector import Vector2D
-else:
-    from classes.improvedLine import linline
-    from classes.Vector import Vector2D
+from __future__ import annotations
 
-import math
 import pyglet
+import json
+import math
+from classes.improvedLine import linline
+from classes.Vector import Vector2D
 
-from typing import List
+from typing import List, Union
 
 class circuit():
-    def __init__(self, vertices: List[linline], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
+    def __init__(self, vertices: List[List[linline]], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
         self.innerLines = vertices[0]
         self.outerLines = vertices[1]
         self.vertices = [item for sublist in vertices for item in sublist]
-        self.checkpoints = checkpoints
+        if checkpoints is None:
+            self.checkpoints = self.generateCheckpoints(10)
+        else:
+            self.checkpoints = checkpoints
 
         self.currentCheckpoint = 0
 
         self.startingPoint = startingPoint
-        self.monocar = monocar    
+        self.monocar = monocar
     
     @classmethod
     def fromSkeletonPoints(cls, points, startingPoint=Vector2D(0,0)):
-        vertices, checkpoints = cls.generate(points, 100)
-        return cls(vertices, checkpoints, startingPoint)
+        vertices, checkpoints, newStartingPoint = cls.generate(points, width=100, startingPoint=startingPoint)
+        return cls(vertices, checkpoints, newStartingPoint)
 
 
     @classmethod
-    def fromFullPoints(cls, points: List[List[Vector2D]], checkpoints: List[List[Vector2D]], startingPoint=Vector2D(0,0), window=(1920,1080), monocar: bool=True) -> None:
+    def fromJSON(cls, filename, window=[1920,1080]):
+        with open(filename, "r") as f:
+            circuitDict = json.load(f)
+        
+        #Feature detection
+        hasSkeleton = 'skeleton' in circuitDict.keys()
+        hasCheckpoints = 'checkpoints' in circuitDict.keys()
+
+        #Assign startingPoint to local variable
+        startingPoint = Vector2D(circuitDict['startingPoint'][0], circuitDict['startingPoint'][1]) 
+
+        #Convert lists of coordinates to Vector2D
+        if hasSkeleton:
+            skeleton = [Vector2D(i[0],i[1]) for i in circuitDict['skeleton']]
+            
+            return cls.fromSkeletonPoints(skeleton, startingPoint=startingPoint)
+        else:
+            innerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['inner']]
+            outerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['outer']]
+
+            if hasCheckpoints: 
+                checkpoints = [[Vector2D(i[0][0],i[0][1]), Vector2D(i[1][0], i[1][1])] for i in circuitDict['checkpoints']]
+                return cls.fromFullPoints([innerPoints, outerPoints],
+                        checkpoints=checkpoints, 
+                        startingPoint=startingPoint,
+                        window=window)
+            else:
+                return cls.fromFullPoints([innerPoints, outerPoints], 
+                        startingPoint=startingPoint,
+                        window=window)
+
+    @classmethod
+    def fromFullPoints(cls, 
+            points: List[List[Vector2D]], 
+            checkpoints: Union[List[List[Vector2D]],None] = None, 
+            numCheckpoints = 10, 
+            startingPoint = Vector2D(0,0), 
+            window = (1920,1080), 
+            monocar: bool = True
+        ) -> circuit:
+        
         lines = []
         checkpoint = []
         margin = Vector2D(50,50)
@@ -46,11 +86,13 @@ class circuit():
             for i in range(len(lane)):
                 j = (i+1)%len(lane)
                 lines[k].append(linline.fromPoints(lane[i]*scale+margin,lane[j]*scale+margin))
-        
-        for line in checkpoints:
-            l = linline.fromPoints(line[0]*scale+margin,line[1]*scale+margin)
-            l.color = (255,215,0)
-            checkpoint.append(l)
+        if checkpoints is not None:
+            for line in checkpoints:
+                l = linline.fromPoints(line[0]*scale+margin,line[1]*scale+margin)
+                l.color = (255,215,0)
+                checkpoint.append(l)
+        else:
+            checkpoint = None
 
         return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar)
 
@@ -71,6 +113,7 @@ class circuit():
         return car.currentCheckpoint
 
     def spawnNextCheckpoint(self, currentCheckpoint):
+        print(currentCheckpoint + 1)
         currentCheckpoint = (currentCheckpoint + 1)%len(self.checkpoints)
         return currentCheckpoint
 
@@ -79,22 +122,34 @@ class circuit():
         for line in self.vertices:
             out.append(line.draw(batch, group, screen))
         
-        if self.monocar:
-            out.append(self.checkpoints[(self.currentCheckpoint + (len(self.checkpoints) - 1))%len(self.checkpoints)].draw(batch, group, screen))
+
+
+        if True:
+            #out.append(self.checkpoints[self.currentCheckpoint - 1].draw(batch, group, screen))
             out.append(self.checkpoints[self.currentCheckpoint].draw(batch, group, screen))
-            out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))
+            #out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))
         else:
-            for line in self.checkpoints:
+            for i, line in enumerate(self.checkpoints):
                 out.append(line.draw(batch, group, screen))
 
         return out
     
     @staticmethod
-    def generate(points: list, width:int=100) -> List[linline]:
+    def generate(points: list, width:int=100, numCheckpoints=10, startingPoint=Vector2D(0,0), window=[1920,1080]) -> List[linline]:
         r = width/2
         
         lines = []
         directions = []
+
+        #generate scale and apply
+        margin = Vector2D(50,50)
+        max_x = max([p.x for p in points])
+        max_y = max([p.y for p in points])
+        scale = min((window[0]-2*margin.x)/max_x, (window[1]-2*margin.y)/max_y)
+        scaledStartingPoint = startingPoint*scale + margin
+
+        points[:] = [point*scale + margin for point in points]
+
         #Create a list of lines from the points
         for i in range(len(points)):
             j = (i+1)%len(points)
@@ -120,7 +175,7 @@ class circuit():
                 paralel_lines[j].append(linline(lines[i].a, lines[i].b, c))
 
 
-        print(paralel_lines)
+        print(len(paralel_lines))
         #Generate joint points
         for ring in paralel_lines:
             intersections = []
@@ -128,72 +183,147 @@ class circuit():
             for i in range(1,len(ring)):
                 j = (i+1)%len(ring)
                 intersection = ring[i].intersect(ring[j])
-                print(f"INTERSECTION: {ring[i]} & {ring[j]}: {intersection}")
                 intersections.append(intersection)
                 if ring[i].b == 0: #Is line vertical?
-                    ring[i].limit = sorted([intersections[i-1].y,intersections[i].y])
+                    ring[i].limit = [intersections[i-1].y,intersections[i].y]
                 else:
-                    ring[i].limit = sorted([intersections[i-1].x,intersections[i].x])
+                    ring[i].limit = [intersections[i-1].x,intersections[i].x]
             if ring[0].b == 0:
-                ring[0].limit = sorted([intersections[0].y, intersections[-1].y])
+                ring[0].limit = [intersections[0].y, intersections[-1].y]
             else:
-                ring[0].limit = sorted([intersections[0].x, intersections[-1].x])
+                ring[0].limit = [intersections[0].x, intersections[-1].x]
 
         #generate
-        checkpoints = []
+        checkpoints = [linline(1,0,0)] # circuit.generateCheckpoints(paralel_lines, numCheckpoints=numCheckpoints)
         maximum_length = sum([abs(v) for v in directions])
 
-        vertices = [item for sublist in paralel_lines for item in sublist]
-        print(vertices)
-        return (vertices, checkpoints)
+        return (paralel_lines, scaledStartingPoint)
     
+    def generateCheckpoints(self, numCheckpoints=10):
+        self.numCheckpoints = numCheckpoints
+        print(numCheckpoints)
+        color = (
+            (255,0,0),
+            (0,255,0),
+            (0,0,255),
+            (255,255,0),
+            (255,0,255),
+            (0,255,255),
+        )
+        checkpoints = [[],[]]
+
+        def appendToCheckpoint(lengthUntilNextCheckpoint, checkpoints, line, currentLengthOfLine, ratioOfLengthToNextCheckpoint):
+            beginOfCurrentLine, _ = line.getEndPoints()
+            newCheckpoint = beginOfCurrentLine + line.r.normalize(in_place=False) * ratioOfLengthToNextCheckpoint
+            checkpoints[0].append(newCheckpoint)
+
+            perpindicular = linline.fromVector(line.n, newCheckpoint)
+            distance = math.inf
+            secondNewCheckpoint = Vector2D(0,0)
+            for outerLine in self.innerLines:
+                intersection = perpindicular.intersect(outerLine)
+                if intersection is not None:
+                    if abs(newCheckpoint - intersection) < distance:
+                        distance = abs(newCheckpoint - intersection)
+                        secondNewCheckpoint = intersection
+
+            checkpoints[1].append(secondNewCheckpoint)
+
+        lengthOfLine = []
+        for line in self.outerLines:
+            pointA, pointB = line.getEndPoints()
+            lengthOfLine.append(abs(pointA - pointB))
+        
+        fullLength = sum(lengthOfLine)
+        gapBetweenCheckpoints = fullLength / numCheckpoints
+        currentLengthOfLine = lengthOfLine
+
+        untilNextCheckpoint = gapBetweenCheckpoints
+
+        for j, line in enumerate(self.outerLines):
+            if(untilNextCheckpoint - currentLengthOfLine[j] > 0):
+                print("NEXT")
+                untilNextCheckpoint -= currentLengthOfLine[j]
+            else:
+                ratioOfLengthToNextCheckpoint = untilNextCheckpoint / currentLengthOfLine[j]
+                print(ratioOfLengthToNextCheckpoint)
+                appendToCheckpoint(untilNextCheckpoint, checkpoints, line, currentLengthOfLine[j], ratioOfLengthToNextCheckpoint)
+                
+                while(gapBetweenCheckpoints - (1-ratioOfLengthToNextCheckpoint) * currentLengthOfLine[j] < 0):
+                    print("I AM THE CULPRIT")
+                    untilNextCheckpoint = gapBetweenCheckpoints + untilNextCheckpoint
+                    ratioOfLengthToNextCheckpoint = (untilNextCheckpoint) / currentLengthOfLine[j]
+                    appendToCheckpoint(untilNextCheckpoint, checkpoints, line, currentLengthOfLine[j], ratioOfLengthToNextCheckpoint)
+                
+                untilNextCheckpoint = gapBetweenCheckpoints - (1-ratioOfLengthToNextCheckpoint) * currentLengthOfLine[j]
+        
+        checkpointLines = []
+        for i in range(len(checkpoints[0])):
+            print(checkpoints[1][i])
+            line = linline.fromPoints(checkpoints[0][i],checkpoints[1][i])
+            line.color = color[i%len(color)]
+            checkpointLines.append(line)
+        
+        return checkpointLines
+
+    # def generateVisualCheckpoints(self, batch, group):
+    #     checkpoints = [[],[]]
+    #     colors = [
+    #         (255,0,0),
+    #         (0,255,0),
+    #         (0,0,255)
+    #     ]
+    #     lengthOfLine = []
+    #     for i, line in enumerate(self.outerLines):
+    #         pointA, pointB = line.getEndPoints()
+    #         lengthOfLine.append(abs(pointA - pointB))
+        
+    #     fullLength = sum(lengthOfLine)
+        
+    #     gapBetweenCheckpoints = fullLength / self.numCheckpoints
+    #     currentLengthOfLine = lengthOfLine
+    #     checkpointsLines2 = []
+    #     untilNextCheckpoint = gapBetweenCheckpoints
+    #     for j, line in enumerate(self.outerLines):
+    #         if(untilNextCheckpoint - currentLengthOfLine[j] > 0):
+    #             untilNextCheckpoint -= currentLengthOfLine[j]
+    #         else:
+    #             beginOfCurrentLine, _ = line.getEndPoints()
+    #             ratioOfLengthToNextCheckpoint = untilNextCheckpoint / currentLengthOfLine[j]
+                
+    #             newCheckpoint = beginOfCurrentLine + -line.r * ratioOfLengthToNextCheckpoint
+    #             checkpoints[0].append(newCheckpoint)
+
+    #             perpindicular = linline.fromVector(line.n, newCheckpoint)
+    #             checkpointsLines2.append(perpindicular.draw(batch, group, screen=[2560,1440]))
+    #             distance = math.inf
+    #             secondNewCheckpoint = Vector2D(0,0)
+    #             for outerLine in self.innerLines:
+    #                 intersection = perpindicular.intersect(outerLine)
+    #                 if intersection is not None:
+    #                     if abs(newCheckpoint - intersection) < distance:
+    #                         distance = abs(newCheckpoint - intersection)
+    #                         secondNewCheckpoint = intersection
+
+    #             checkpoints[1].append(secondNewCheckpoint)
+                
+    #             untilNextCheckpoint = gapBetweenCheckpoints - (1 - ratioOfLengthToNextCheckpoint)*currentLengthOfLine[j]
+        
+    #     checkpointLines = []
+    #     for i in range(len(checkpoints[0])):
+    #         checkpointLines.append(pyglet.shapes.Circle(checkpoints[0][i].x, checkpoints[0][i].y, 10, color=colors[i%3], batch=batch, group=group))
+    #         checkpointLines.append(pyglet.shapes.Circle(checkpoints[1][i].x, checkpoints[1][i].y, 10, batch=batch, group=group))
+        
+    #     return checkpointLines, checkpointsLines2
+
+
+
+
+
+
     def reset(self):
         self.currentCheckpoint = 0;
 
 
 if __name__ == "__main__":
-    # Testing
-    window = pyglet.window.Window(resizable=True, fullscreen=True) 
-
-    # inner_points = [[18,3],[8,3],[5,4],[3,6],[2,9],[2,12],[3,14],[4,14],[6,12],[7,8],[8,7],[12,6],[16,6],[19,9],[20,11],[16,13],[13,12],[12,14],[13,15],[17,16],[20,15],[22,13],[23,8],[21,5]]
-    # inner = [Vector2D(i[0],i[1]) for i in inner_points]
-
-    # outer_points = [[18,0],[8,0],[2,3],[0,9],[0,14],[2,16],[5,16],[8,12],[9,9],[12,8],[15,8],[17,10],[16,11],[12,10],[11,11],[10,13],[10,15],[12,17],[17,17],[20,16],[23,14],[25,8],[23,4]]
-    # outer = [Vector2D(i[0],i[1]) for i in outer_points]
-
-
-    # checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[0,6],[3,7]],[[-1,13],[3,12]],[[4,13],[7,15]],[[6,9],[10,11]],[[11,5],[12,9]],[[15,10],[18,7]],[[15,10],[14,13]],[[9,14],[13,13]],[[15,17],[16,15]],[[21,12],[24,15]],[[22,8],[25,6]],[[19,5],[20,1]],[[15,-1],[15,4]]]
-    # circuit_checkpoints = []
-    # for i, checkpoint in enumerate(checkpoints):
-    #     circuit_checkpoints.append([])
-    #     for x, point in enumerate(checkpoint):
-    #         circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
-
-    circ = circuit.fromSkeletonPoints([Vector2D(p[0],p[1]) for p in [[100,100],[100,400],[700,100]]])
-    batch = pyglet.graphics.Batch()
-    group = pyglet.graphics.OrderedGroup(0)
-    running = True
-
-    key = pyglet.window.key
-    key_handler = key.KeyStateHandler()
-    speed = 1.0
-
-    @window.event
-    def on_close():
-        running = False
-
-    @window.event
-    def on_draw():
-        render()
-
-    def update(dt):
-        pass
-
-    def render():
-        window.clear()
-        _ = circ.draw(batch, window.get_size(), group)
-        batch.draw()
-
-    if __name__ == "__main__":
-        pyglet.clock.schedule_interval(update, 1/120.0)
-        pyglet.app.run()
+    circuit.fromJSON("../circuits/BONK_CIRCUIT.json")

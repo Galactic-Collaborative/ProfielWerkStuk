@@ -1,17 +1,14 @@
 from __future__ import annotations
-if __name__ == "__main__":
-    from improvedLine import linline
-    from Vector import Vector2D
-else:
-    from classes.improvedLine import linline
-    from classes.Vector import Vector2D
+
+from classes.improvedLine import linline
+from classes.Vector import Vector2D
 
 import pyglet
 
 from typing import List
 
 class circuit():
-    def __init__(self, vertices: List[linline], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
+    def __init__(self, vertices: List[List[linline]], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
         self.innerLines = vertices[0]
         self.outerLines = vertices[1]
         self.vertices = [item for sublist in vertices for item in sublist]

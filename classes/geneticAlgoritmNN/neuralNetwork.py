@@ -3,7 +3,7 @@ import random
 
 class NeuralNetwork:
     def __init__(self):
-        self.inputSize = 6
+        self.inputSize = 8
         self.outputSize = 4
         self.hiddenSize = 16  
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
@@ -29,6 +29,10 @@ class NeuralNetwork:
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
 
+    def loadWeights(self):
+        self.W1 = np.loadtxt("w1.txt", dtype=float)
+        self.W2 = np.loadtxt("w2.txt", dtype=float)
+
     def clone(self):
         clone = NeuralNetwork()
         clone.W1 = np.copy(self.W1)
@@ -39,19 +43,18 @@ class NeuralNetwork:
         self.mutateFunction(self.W1)
         self.mutateFunction(self.W2)
 
-        # for weight in [self.W1, self.W2]:
-        #     for i in range(weight.shape[0]):
-        #         for j in range(weight.shape[1]):
-        #             rand = random.random()
-        #             if(rand < mutationRate):
-        #                 weight[i][j] += random.uniform(-1, 1)
-
     def mutateFunction(self, weight):
-        mutationRate = 1
+        mutationRate = 0.15
         for i in range(len(weight)):
             rand = random.random()
             if(rand < mutationRate):
                 weight[i] += random.uniform(-1, 1)
+
+    def crossParent(self, car):
+        parent = NeuralNetwork()
+        parent.W1 = np.copy(self.W1)
+        parent.W2 = np.copy(car.W2)
+        return parent
 
 if __name__ == "__main__":
     nn = NeuralNetwork()

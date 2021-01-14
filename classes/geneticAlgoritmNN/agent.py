@@ -69,21 +69,14 @@ class Agent:
             lineToOutside = linline.fromVector(minLine.n, self.car.position) #BC
             intersection = lineToOutside.intersect(minLine) #B
             startPoint, _ = minLine.getEndPoints() #A
-            print(" ")
-            print(minLine)
             if startPoint.x == None:
-                print("StartPoint X is None")
                 distanceLine = 0
             elif startPoint.y == None: 
-                print("StartPoint Y is None")
                 distanceLine = 0
             elif intersection == None:
-                print("Intersection is None")
                 distanceLine = 0
             else:
                 distanceLine = intersection - startPoint #AB
-            print(" ")
-            print(" ")
             self.fitness = (self.car.currentCheckpoint*1000) + ((index*100)+abs(distanceLine))/(self.step**2)
         else:
             self.fitness = 0

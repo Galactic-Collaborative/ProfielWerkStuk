@@ -57,6 +57,9 @@ def update(dt):
             world.showA = True
         if key_handler[key.T]:
             carList[world.bestCar].nn.saveWeights()
+        if key_handler[key.K]:
+            for agent in carList:
+                agent.dead = True
 
         for agent in carList:
             hitbox = world.generateHitbox(agent)

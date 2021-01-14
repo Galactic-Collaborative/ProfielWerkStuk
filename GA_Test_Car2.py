@@ -43,8 +43,6 @@ def update(dt):
         world.naturalSelection()
         world.crossParenting(2)
         world.mutateAll()
-        carList = world.carList
-        print(f"Carlist count: {len(carList)}")
     else:
         carList = world.carList
         if key_handler[key.S]:
@@ -57,6 +55,9 @@ def update(dt):
             world.showA = True
         if key_handler[key.T]:
             carList[world.bestCar].nn.saveWeights()
+        if key_handler[key.K]:
+            for agent in carList:
+                agent.dead = True
 
         for agent in carList:
             hitbox = world.generateHitbox(agent)

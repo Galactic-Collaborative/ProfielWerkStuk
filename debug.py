@@ -1,5 +1,5 @@
-from classes.environment import circuitEnv
-from tf_agents.environments import utils
+from classes.improvedLine import linline
+from classes.Vector import Vector2D
 
-environment = circuitEnv()
-utils.validate_py_environment(environment, episodes=100)
+l3 = linline.fromPoints(Vector2D(1,1), Vector2D(5,5))
+print(l3.getEndPoints())

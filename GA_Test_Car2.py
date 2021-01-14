@@ -43,8 +43,6 @@ def update(dt):
         world.naturalSelection()
         world.crossParenting(2)
         world.mutateAll()
-        carList = world.carList
-        print(f"Carlist count: {len(carList)}")
     else:
         carList = world.carList
         if key_handler[key.S]:

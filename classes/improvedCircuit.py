@@ -9,7 +9,7 @@ from classes.Vector import Vector2D
 from typing import List, Union
 
 class circuit():
-    def __init__(self, vertices: List[List[linline]], checkpoints: List[linline], startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
+    def __init__(self, vertices: List[List[linline]], checkpoints: List[linline], skeletonLines: List[linline] = None, startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
         self.innerLines = vertices[0]
         self.outerLines = vertices[1]
         self.vertices = [item for sublist in vertices for item in sublist]
@@ -19,6 +19,8 @@ class circuit():
             self.checkpoints = checkpoints
 
         self.currentCheckpoint = 0
+        self.skeletonLines = skeletonLines
+
 
         self.startingPoint = startingPoint
         self.monocar = monocar
@@ -30,7 +32,7 @@ class circuit():
 
 
     @classmethod
-    def fromJSON(cls, filename, window=[1920,1080]):
+    def fromJSON(cls, filename, window=[1920,1080], method="Skeleton"):
         with open(filename, "r") as f:
             circuitDict = json.load(f)
         
@@ -42,9 +44,9 @@ class circuit():
         startingPoint = Vector2D(circuitDict['startingPoint'][0], circuitDict['startingPoint'][1]) 
 
         #Convert lists of coordinates to Vector2D
-        if hasSkeleton:
-            skeleton = [Vector2D(i[0],i[1]) for i in circuitDict['skeleton']]
-            
+        skeleton = [Vector2D(i[0],i[1]) for i in circuitDict['skeleton']] if hasSkeleton else None
+
+        if hasSkeleton and method=="Skeleton":
             return cls.fromSkeletonPoints(skeleton, startingPoint=startingPoint)
         else:
             innerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['inner']]
@@ -64,7 +66,8 @@ class circuit():
     @classmethod
     def fromFullPoints(cls, 
             points: List[List[Vector2D]], 
-            checkpoints: Union[List[List[Vector2D]],None] = None, 
+            checkpoints: Union[List[List[Vector2D]],None] = None,
+            skeletonPoints = None,
             numCheckpoints = 10, 
             startingPoint = Vector2D(0,0), 
             window = (1920,1080), 
@@ -91,10 +94,14 @@ class circuit():
                 l = linline.fromPoints(line[0]*scale+margin,line[1]*scale+margin)
                 l.color = (255,215,0)
                 checkpoint.append(l)
-        else:
-            checkpoint = None
+        
+        skeletonLines = []
+        if skeletonPoints is not None:
+            for i in range(skeletonPoints):
+                j = (i+1)%len(skeletonPoints)
+                skeletonLines[i].append(linline.fromPoints(skeletonPoints[i]*scale+margin,skeletonPoints[j]*scale+margin))
 
-        return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar)
+        return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar, skeletonLines=skeletonLines)
 
     def collidedWithCar(self, hitbox) -> bool:
         for line in self.vertices:

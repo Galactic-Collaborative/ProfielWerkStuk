@@ -167,8 +167,12 @@ class linline:
         return collided
 
 
-    def distance(self, point):
-        d = (abs(self.n @ point - self.c))/abs(self.n)
+    def distance(self, point) -> Union[int, None]:
+        perpendicular = self.fromVector(self.n, point)
+        if(self.intersect(perpendicular) != None):
+            d = (abs(self.n @ point - self.c))/abs(self.n)
+        else:
+            d = None
         return d       
         
     def draw(self, batch, group, screen=[1920,1080], width=10):

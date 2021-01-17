@@ -1,8 +1,10 @@
 import random
+import pandas as pd
 from random import sample
 from classes.Vector import Vector2D
 from classes.geneticAlgoritmNN.agent import Agent
 from pyglet import shapes
+from openpyxl import load_workbook
 
 class World:
     def __init__(self, cars, carX, carY, window, load=False) -> None:
@@ -22,6 +24,7 @@ class World:
 
         self.maxStep = 1000
         self.load = load
+        self.row = None
 
     def draw(self, batch, foreground, background, vertices):
         if self.showA:
@@ -67,12 +70,28 @@ class World:
         for agent in self.carList:
             check.append(agent.car.currentCheckpoint)
             check2.append(agent.fitness)
-        print(" ")
-        print("Current Checkpoint:")
-        print(check)
-        print(" ")
-        print("Fitness:")
-        print(check2)
+
+        if self.row == None:
+            self.row = 0
+        else:
+            self.row += 51
+
+        dict = {'Checkpoint': check, 'Fitness': check2}
+        excelList = pd.DataFrame(dict)
+
+        #writer = pd.ExcelWriter(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx', engine='openpyxl')
+        #writer.book = load_workbook(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx')
+        #writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)
+        #reader = pd.read_excel(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx')
+        #excelList.to_excel(writer, index=False,header=False,startrow=self.row)
+
+        #writer.close()
+
+        #excelList.to_excel(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx', index = False, startrow = self.row, header = True)
+
+        ### Bij data opslaan deze aanzetten ###
+        #excelList.to_csv(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.csv', mode='a', header=True)
+        print(excelList)
 
         nextGen = []
         self.setBestCar()

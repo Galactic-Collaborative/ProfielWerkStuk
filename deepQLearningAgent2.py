@@ -16,16 +16,12 @@ def generate_state_frame_stack_from_queue(deque):
     return np.transpose(frame_stack, (1, 2, 0))
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Play CarRacing by the trained model.')
-    parser.add_argument('-m', '--model', required=True, help='The `.h5` file of the trained model.')
-    parser.add_argument('-e', '--episodes', type=int, default=1, help='The number of episodes should the model plays.')
-    args = parser.parse_args()
-    train_model = args.model
-    play_episodes = args.episodes
+
+    play_episodes = 10
 
     env = gym.make('CarRacing-v0')
-    agent = CarRacingDQNAgent(epsilon=0) # Set epsilon to 0 to ensure all actions are instructed by the agent
-    agent.load(train_model)
+    agent = CarRacingDQNAgent(epsilon=0, memory_size=10000) # Set epsilon to 0 to ensure all actions are instructed by the agent
+    agent.load("save/trial_75.h5")
 
     for e in range(play_episodes):
         init_state = env.reset()

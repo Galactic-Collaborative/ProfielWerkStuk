@@ -4,6 +4,11 @@ from collections import deque
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from tensorflow.keras.optimizers import Adam
+import json
+
+import tensorflow as tf
+
+tf.compat.v1.disable_eager_execution()
 
 class CarRacingDQNAgent:
     def __init__(
@@ -15,7 +20,7 @@ class CarRacingDQNAgent:
             (-1, 0,   0), (0, 0,   0), (1, 0,   0)
         ],
         frame_stack_num = 3,
-        memory_size     = 5000,
+        memory_size     = 10000,
         gamma           = 0.95,  # discount rate
         epsilon         = 1.0,   # exploration rate
         epsilon_min     = 0.1,
@@ -77,10 +82,15 @@ class CarRacingDQNAgent:
         self.model.fit(np.array(train_state), np.array(train_target), epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+        else:
+            self.epsilon = self.epsilon_min
 
     def load(self, name):
         self.model.load_weights(name)
         self.update_target_model()
 
-    def save(self, name):
+    def save(self, name, time_frame_counter=0, episode=0):
         self.target_model.save_weights(name)
+        self.target_model.save_weights("./save/current_model.h5")
+        with open("./save/model.json", "w") as f:
+            json.dump([time_frame_counter, episode], f)

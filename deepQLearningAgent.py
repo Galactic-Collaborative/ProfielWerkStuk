@@ -1,6 +1,9 @@
 from __future__ import absolute_import, division, print_function
+import os
 
 import pyglet
+from gym.envs.box2d.car_racing import CarRacing
+
 # from classes.car import Car
 # from classes.circuit import circuit
 # from classes.Vector import Vector2D
@@ -8,6 +11,7 @@ import pyglet
 
 import gym
 import base64
+import tempfile
 import numpy as np
 import pyglet
 import tensorflow as tf
@@ -24,6 +28,11 @@ from tf_agents.replay_buffers import tf_uniform_replay_buffer
 from tf_agents.trajectories import trajectory
 from tf_agents.utils import common
 
+
+#Hypervariables
+tempdir = os.getenv("TEST_TMPDIR", tempfile.gettempdir())
+
+
 #Hyperparamters
 num_iterations = 20000
 
@@ -35,11 +44,16 @@ batch_size = 64
 learning_rate = 1e-3
 log_interval = 200 
 
-num_eval_episodes = 1 
+num_eval_episodes = 10
 eval_interval = 1000 
 
-train_env = tf_py_environment.TFPyEnvironment(suite_gym.load("CarRacing-v0"))
-eval_env = tf_py_environment.TFPyEnvironment(suite_gym.load("CarRacing-v0"))
+save_interval = 2000
+
+train_env_raw = CarRacing(discretize_actions="hard", auto_render=True)
+eval_env_raw = CarRacing(discretize_actions="hard", auto_render=True)
+
+train_env = tf_py_environment.TFPyEnvironment(suite_gym.wrap_env(train_env_raw))
+eval_env = tf_py_environment.TFPyEnvironment(suite_gym.wrap_env(eval_env_raw))
 
 print(train_env.time_step_spec())
 
@@ -60,7 +74,7 @@ agent = dqn_agent.DqnAgent(
     optimizer=optimizer,
     td_errors_loss_fn=common.element_wise_squared_loss,
     train_step_counter=train_step_counter,
-    epsilon_greedy=0.3
+    epsilon_greedy=0.99
 )
 agent.initialize()
 
@@ -80,6 +94,7 @@ replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
 )
 
 def compute_avg_return(environment, policy, num_episodes=10):
+  print("Computing Average Return...")
 
   total_return = 0.0
   for _ in range(num_episodes):
@@ -113,7 +128,7 @@ def collect_step(environment, policy, buffer):
 def collect_data(env, policy, buffer, steps):
   for _ in range(steps):
     collect_step(env, policy, buffer)
-
+  
 collect_data(train_env, random_policy, replay_buffer, initial_collect_steps)
 
 dataset = replay_buffer.as_dataset(
@@ -125,6 +140,16 @@ dataset = replay_buffer.as_dataset(
 iterator = iter(dataset)
 
 ### TRAINING THE AGENT ###
+global_step = tf.compat.v1.train.get_or_create_global_step()
+checkpoint_dir = os.path.join(tempdir, 'checkpoint')
+train_checkpointer = common.Checkpointer(
+    ckpt_dir=checkpoint_dir,
+    max_to_keep=5,
+    agent=agent,
+    policy=agent.policy,
+    replay_buffer=replay_buffer,
+    global_step=global_step
+)
 
 # Reset the train step
 agent.train_step_counter.assign(0)
@@ -132,6 +157,9 @@ agent.train_step_counter.assign(0)
 # Evaluate the agent's policy once before training.
 avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
 returns = [avg_return]
+
+train_checkpointer.initialize_or_restore()
+global_step = tf.compat.v1.train.get_global_step()
 
 while True:
   # Collect a few steps using collect_policy and save to the replay buffer.
@@ -151,4 +179,7 @@ while True:
     avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
     print('step = {0}: Average Return = {1}'.format(step, avg_return))
     returns.append(avg_return)
+  
+  #if step % save_interval == 0:
+  #  train_checkpointer.save(global_step)
     

@@ -1,7 +1,10 @@
 import argparse
+import gc
 import gym
 import cv2
+import json
 import numpy as np
+from datetime import datetime
 from collections import deque
 from classes.DeepQNetwork.DeepQNetworkAgent import CarRacingDQNAgent
 
@@ -21,26 +24,23 @@ RENDER                        = True
 STARTING_EPISODE              = 1
 ENDING_EPISODE                = 1000
 SKIP_FRAMES                   = 2
-TRAINING_BATCH_SIZE           = 64
-SAVE_TRAINING_FREQUENCY       = 25
+TRAINING_BATCH_SIZE           = 16
+SAVE_TRAINING_FREQUENCY       = 10
 UPDATE_TARGET_MODEL_FREQUENCY = 5
 
+EPSILON_DECAY = .99994
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Training a DQN agent to play CarRacing.')
-    parser.add_argument('-m', '--model', help='Specify the last trained model path if you want to continue training after it.')
-    parser.add_argument('-s', '--start', type=int, help='The starting episode, default to 1.')
-    parser.add_argument('-e', '--end', type=int, help='The ending episode, default to 1000.')
-    parser.add_argument('-p', '--epsilon', type=float, default=1.0, help='The starting epsilon of the agent, default to 1.0.')
-    args = parser.parse_args()
+    with open("./save/model.json", "r") as f:
+        total_time_frame_counter, episode = json.load(f)
+        print(f"Beginning at frame {total_time_frame_counter} on episode {episode}")
+
+    STARTING_EPISODE = episode
 
     env = gym.make('CarRacing-v0')
-    agent = CarRacingDQNAgent(epsilon=args.epsilon)
-    if args.model:
-        agent.load(args.model)
-    if args.start:
-        STARTING_EPISODE = args.start
-    if args.end:
-        ENDING_EPISODE = args.end
+    agent = CarRacingDQNAgent(epsilon=(EPSILON_DECAY)**((total_time_frame_counter if total_time_frame_counter > 16 else 16)-16), epsilon_decay=EPSILON_DECAY, memory_size=5000)
+
+    agent.load(f"save/current_model.h5")
 
     for e in range(STARTING_EPISODE, ENDING_EPISODE+1):
         init_state = env.reset()
@@ -82,16 +82,20 @@ if __name__ == '__main__':
             agent.memorize(current_state_frame_stack, action, reward, next_state_frame_stack, done)
 
             if done or negative_reward_counter >= 25 or total_reward < 0:
-                print('Episode: {}/{}, Scores(Time Frames): {}, Total Rewards(adjusted): {:.2}, Epsilon: {:.2}'.format(e, ENDING_EPISODE, time_frame_counter, float(total_reward), float(agent.epsilon)))
+                print('[{}] Episode: {}/{}, Scores(Time Frames): {}, Total Rewards(adjusted): {:.2}, Epsilon: {:.2}'.format(datetime.now(), e, ENDING_EPISODE, time_frame_counter, float(total_reward), float(agent.epsilon)))
                 break
+            
+            gc.collect()
             if len(agent.memory) > TRAINING_BATCH_SIZE:
                 agent.replay(TRAINING_BATCH_SIZE)
             time_frame_counter += 1
+            total_time_frame_counter += 1
 
         if e % UPDATE_TARGET_MODEL_FREQUENCY == 0:
             agent.update_target_model()
 
         if e % SAVE_TRAINING_FREQUENCY == 0:
-            agent.save('./save/trial_{}.h5'.format(e))
+            agent.save('./save/trial_{}.h5'.format(e), total_time_frame_counter, e)
 
+    print("closing environment")
     env.close()

@@ -4,3 +4,4 @@ _pycache_/*
 *.pyc
 *.cpython-37.pyc
 test.py
+gymV2/*

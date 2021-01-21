@@ -11,7 +11,8 @@ outer_points = [[18,0],[8,0],[2,3],[0,9],[0,14],[2,16],[5,16],[8,12],[9,9],[12,8
 inner = [Vector2D(i[0],i[1]) for i in inner_points]
 outer = [Vector2D(i[0],i[1]) for i in outer_points]
 
-checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[0,6],[3,7]],[[-1,13],[3,12]],[[3.5,13.5],[3.5,16.5]],[[4,13],[7,15]],[[6,9],[10,11]],[[11,5],[12,9]],[[15,10],[18,7]],[[15,10],[14,13]],[[9,14],[13,13]],[[15,17],[16,15]],[[21,12],[24,15]],[[22,8],[25,6]],[[19,5],[20,1]],[[15,-1],[15,4]]]
+#checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[0,6],[3,7]],[[-1,13],[3,12]],[[3.5,13.5],[3.5,16.5]],[[4,13],[7,15]],[[6,9],[10,11]],[[11,5],[12,9]],[[15,10],[18,7]],[[15,10],[14,13]],[[9,14],[13,13]],[[15,17],[16,15]],[[21,12],[24,15]],[[22,8],[25,6]],[[19,5],[20,1]],[[15,-1],[15,4]]]
+checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[13,5],[13,9]],[[15,-1],[15,4]]]
 circuit_checkpoints = []
 for i, checkpoint in enumerate(checkpoints):
     circuit_checkpoints.append([])
@@ -27,6 +28,8 @@ running = True
 key = pyglet.window.key
 key_handler = key.KeyStateHandler()
 
+checkpointNumber = len(circuit_checkpoints)
+
 @window.event
 def on_close():
     running = False
@@ -38,7 +41,7 @@ def on_draw():
 def update(dt):
     window.push_handlers(key_handler)
     if(world.allCarsDead()):
-        world.calcFitness(circ.outerLines)
+        world.calcFitness(circ.outerLines, checkpointNumber)
         world.naturalSelection()
         world.crossParenting(2)
         world.mutateAll()

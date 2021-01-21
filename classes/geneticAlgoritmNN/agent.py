@@ -16,16 +16,19 @@ class Agent:
         
         self.nn = NeuralNetwork()
         self.bestCar = best
+
+        self.index = 0
         
     def draw(self, batch, foreground, background, vertices, show):
         car = self.car.draw(batch, foreground, self.bestCar)
-        intersectEyes = self.car.intersectEyes(batch, vertices, background)
-        #if show or not self.dead:
-        #    eyes = self.car.eyes(batch, background)
+        # intersectEyes = self.car.intersectEyes(batch, vertices, background)
+        # if show or not self.dead:
+            # eyes = self.car.eyes(batch, background)
             # hitbox = self.car.hitbox(batch, background)
             # return car, intersectEyes, eyes, hitbox
-        #    return car, intersectEyes, eyes
-        return car, intersectEyes
+            # return car, intersectEyes, eyes
+        # return car, intersectEyes
+        return car
 
     def generateHitbox(self):
         hitbox = self.car.generateHitbox()
@@ -57,18 +60,33 @@ class Agent:
         else:
             self.car.dead = self.dead
 
-    def calcFitness(self, outsideLines):        
-        if self.car.currentCheckpoint > 0:
+    def calcFitness(self, skeletonLines, checkpoints, blindSpot, blindIndex):        
+        if self.car.currentCheckpoint > 0 or self.car.currentLap > 0:
+            if self.car.currentCheckpoint >= checkpoints:
+                self.car.currentLap += 1
+                self.car.currentCheckpoint = 0
             minimum = 100000
             minLine = None
-            for line in outsideLines:
-                distance = d if (d:=line.distance(self.car.position)) != None else inf 
+            for line in skeletonLines:
+                distance = d if (d:=line.distance(self.car.position)) != None else 99999 
                 if distance < minimum:
                     minimum = distance
                     minLine = line
-        
-            index = outsideLines.index(minLine)
-            linesToIndex = outsideLines[:index]
+            if minimum > 80:
+                minDistance = 100000
+                minSpot = None
+                for spot in blindSpot:
+                    distance = abs(self.car.position - spot)
+                    if distance < minDistance:
+                        minDistance = distance
+                        minSpot = spot
+                indexSpot = blindSpot.index(minSpot)
+                index = blindIndex[indexSpot]
+                minLine = skeletonLines[index]
+            else:
+                index = skeletonLines.index(minLine)
+
+            linesToIndex = skeletonLines[:index]
             distanceToIndex = 0
             for line in linesToIndex:
                 startPointLine, endPointLine = line.getEndPoints()
@@ -85,8 +103,12 @@ class Agent:
                 distanceLine = 0
             else:
                 distanceLine = intersection - startPoint #AB
-            #self.fitness = (self.car.currentCheckpoint*1000) + ((index*100)+abs(distanceLine))/(self.step**2)
-            self.fitness = ((abs(distanceLine)*100)+distanceToIndex*100)
+
+            if index > 10 and self.car.currentCheckpoint < 3:
+                self.fitness = 0
+            else:
+                self.fitness = ((self.car.currentLap * 100) + (abs(distanceLine)*100)+distanceToIndex*100)
+            self.index = index
         else:
             self.fitness = 0
 

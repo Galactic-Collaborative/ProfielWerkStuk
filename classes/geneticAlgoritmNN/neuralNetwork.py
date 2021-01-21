@@ -29,6 +29,10 @@ class NeuralNetwork:
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
 
+    def autoSaveWeights(self):
+        np.savetxt("autoSave1.txt", self.W1, fmt="%s")
+        np.savetxt("autoSave2.txt", self.W2, fmt="%s")
+
     def loadWeights(self):
         self.W1 = np.loadtxt("w1.txt", dtype=float)
         self.W2 = np.loadtxt("w2.txt", dtype=float)
@@ -44,7 +48,7 @@ class NeuralNetwork:
         self.mutateFunction(self.W2)
 
     def mutateFunction(self, weight):
-        mutationRate = 0.15
+        mutationRate = 0.25
         for i in range(len(weight)):
             rand = random.random()
             if(rand < mutationRate):
@@ -59,20 +63,20 @@ class NeuralNetwork:
 if __name__ == "__main__":
     nn = NeuralNetwork()
 
-    # print("NN1:")
-    # print(nn.W1)
-    # print(" ")
-    # print(nn.W2)
-    # print(" ")
+    print("NN1:")
+    print(nn.W1)
+    print(" ")
+    print(nn.W2)
+    print(" ")
 
     nn2 = NeuralNetwork()
 
-    # print(" ")
-    # print("NN2 1:")
-    # print(nn2.W1)
-    # print(" ")
-    # print(nn2.W2)
-    # print(" ")
+    print(" ")
+    print("NN2 1:")
+    print(nn2.W1)
+    print(" ")
+    print(nn2.W2)
+    print(" ")
 
     nn2.W1 = nn.W1
     nn2.W2 = nn.W2
@@ -93,7 +97,7 @@ if __name__ == "__main__":
     # print(nn3.W2)
     # print(" ")
 
-    nn_input = [5, 3, 5, 1, 7, 8]
+    nn_input = [5, 3, 5, 1, 7, 8, 4, 8]
 
     output = nn.feedforward(nn_input)
     output2 = nn2.feedforward(nn_input)

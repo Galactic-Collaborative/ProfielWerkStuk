@@ -12,19 +12,24 @@ class World:
         self.carX = carX
         self.carY = carY
         self.carList = [Agent(self.carX, self.carY, window=self.window) for _ in range(cars)]
+        self.oldCarList = []
         self.show = False
         self.showA = True
         self.carCount = cars
 
         self.fitnessSum = 0
         self.gen = 1
+        self.autoGen = 1
 
         self.bestCar = 0
+        self.oldBestAgent = self.carList[self.bestCar]
         self.bestCarPosition = Vector2D(0,0)
 
         self.maxStep = 1000
         self.load = load
         self.row = None
+        self.blindSpots = []
+        self.blindIndex = []
 
     def draw(self, batch, foreground, background, vertices):
         if self.showA:
@@ -36,8 +41,20 @@ class World:
     
     def drawBestCarPlace(self, batch, bestCarPlace):
         drawPlace = shapes.Circle(self.bestCarPosition.x,self.bestCarPosition.y,20,color=(0,255,0),batch=batch,group=bestCarPlace)
-        drawPlace.opacity = 200
+        drawPlace.opacity = 150
         return drawPlace
+
+    def addBlindSpot(self, points, index):
+        for point in points:
+            self.blindSpots.append(point)
+        self.blindIndex = index
+
+    def drawBlindSpot(self, batch, group):
+        out = []
+        for point in self.blindSpots:
+            shape = shapes.Circle(point.x,point.y,10,color=(255,20,20),batch=batch,group=group)
+            out.append(shape)
+        return out
 
     def update(self, dt, vertices):
         for agent in self.carList:
@@ -56,36 +73,34 @@ class World:
                 return False
         return True
 
-    def calcFitness(self, outsideLines):
+    def calcFitness(self, outsideLines, checkpoints):
         for car in self.carList:
-            car.calcFitness(outsideLines)
+            car.calcFitness(outsideLines, checkpoints, self.blindSpots, self.blindIndex)
 
     def naturalSelection(self):
         self.gen += 1
+        self.autoGen += 1
+        if self.autoGen == 10:
+            self.autoGen = 0
+            self.carList[self.bestCar].nn.autoSaveWeights()
         print("------------------------------------------------------------------------------------------------------------------------------")
         print(f"NEXT GEN: {self.gen}")
 
         check = []
         check2 = []
+        check3= []
         for agent in self.carList:
             check.append(agent.car.currentCheckpoint)
             check2.append(agent.fitness)
+            check3.append(agent.index)
 
         if self.row == None:
             self.row = 0
         else:
             self.row += 51
 
-        dict = {'Checkpoint': check, 'Fitness': check2}
+        dict = {'Checkpoint': check, 'Fitness': check2, 'Index': check3}
         excelList = pd.DataFrame(dict)
-
-        #writer = pd.ExcelWriter(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx', engine='openpyxl')
-        #writer.book = load_workbook(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx')
-        #writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)
-        #reader = pd.read_excel(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx')
-        #excelList.to_excel(writer, index=False,header=False,startrow=self.row)
-
-        #writer.close()
 
         #excelList.to_excel(r'C:\Users\Tboefijn\OneDrive\Documenten\dataPrintPws.xlsx', index = False, startrow = self.row, header = True)
 
@@ -155,5 +170,17 @@ class World:
             if(car.fitness > topFitness):
                 topFitness = car.fitness 
                 self.bestCar = i
-        self.bestCarPosition = self.carList[self.bestCar].car.position
-        print(f"Best Car: {self.bestCar}")
+        
+        if self.carList[self.bestCar].fitness > self.oldBestAgent.fitness or self.gen == 2:
+            self.bestCarPosition = self.carList[self.bestCar].car.position
+            self.oldBestAgent = self.carList[self.bestCar]
+            self.oldCarList = self.carList[:]
+            print(f"Best Car: {self.bestCar}")
+        else:
+            print("Old Best")
+            print(f"Best Car: {self.bestCar}")
+
+            self.carList = []
+            self.carList = self.oldCarList[:]
+            self.bestCar = self.carList.index(self.oldBestAgent)
+            print(f"Best Car: {self.bestCar}")

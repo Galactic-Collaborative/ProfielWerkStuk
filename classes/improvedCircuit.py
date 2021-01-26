@@ -52,6 +52,13 @@ class circuit():
             innerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['inner']]
             outerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['outer']]
 
+            if hasCheckpoints and hasSkeleton:
+                checkpoints = [[Vector2D(i[0][0],i[0][1]), Vector2D(i[1][0], i[1][1])] for i in circuitDict['checkpoints']]
+                return cls.fromFullPoints([innerPoints, outerPoints],
+                        checkpoints=checkpoints, 
+                        skeletonPoints=skeleton,
+                        startingPoint=startingPoint,
+                        window=window)
             if hasCheckpoints: 
                 checkpoints = [[Vector2D(i[0][0],i[0][1]), Vector2D(i[1][0], i[1][1])] for i in circuitDict['checkpoints']]
                 return cls.fromFullPoints([innerPoints, outerPoints],
@@ -98,9 +105,9 @@ class circuit():
         
         skeletonLines = []
         if skeletonPoints is not None:
-            for i in range(skeletonPoints):
+            for i in range(len(skeletonPoints)):
                 j = (i+1)%len(skeletonPoints)
-                skeletonLines[i].append(linline.fromPoints(skeletonPoints[i]*scale+margin,skeletonPoints[j]*scale+margin))
+                skeletonLines.append(linline.fromPoints(skeletonPoints[i]*scale+margin,skeletonPoints[j]*scale+margin))
 
         return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar, skeletonLines=skeletonLines)
 
@@ -121,21 +128,23 @@ class circuit():
         return car.currentCheckpoint
 
     def spawnNextCheckpoint(self, currentCheckpoint):
-        print(currentCheckpoint + 1)
         currentCheckpoint = (currentCheckpoint + 1)%len(self.checkpoints)
         return currentCheckpoint
 
-    def draw(self, batch, screen, group):
+    def draw(self, batch, screen, group, hideAll=True):
         out = []
         for line in self.vertices:
             out.append(line.draw(batch, group, screen))
         
+        for skeletonLine in self.skeletonLines:
+            skeletonLine.color = (255,0,0)
+            skeletonLine.opacity = 100
+            out.append(skeletonLine.draw(batch, group, screen))
 
-
-        if True:
-            #out.append(self.checkpoints[self.currentCheckpoint - 1].draw(batch, group, screen))
+        if hideAll:
+            out.append(self.checkpoints[self.currentCheckpoint - 1].draw(batch, group, screen))
             out.append(self.checkpoints[self.currentCheckpoint].draw(batch, group, screen))
-            #out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))
+            out.append(self.checkpoints[(self.currentCheckpoint + 1)%len(self.checkpoints)].draw(batch, group, screen))
         else:
             for i, line in enumerate(self.checkpoints):
                 out.append(line.draw(batch, group, screen))
@@ -330,7 +339,7 @@ class circuit():
 
 
     def reset(self):
-        self.currentCheckpoint = 0;
+        self.currentCheckpoint = 0
 
 
 if __name__ == "__main__":

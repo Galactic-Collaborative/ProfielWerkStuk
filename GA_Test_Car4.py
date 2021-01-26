@@ -5,6 +5,48 @@ from classes.improvedCircuit import circuit
 from classes.Vector import Vector2D
 from pyglet import clock
 
+class Viewer(pyglet.window.Window):
+    color = {
+        'background':"000000" 
+    }
+
+    def __init__(self, width, height, world, circuit):
+        super(Viewer, self).__init__(width, height, resizable=False, caption='Genetic Algorithm Car Test', vsync=True)
+
+        self.batch = pyglet.graphics.Batch()
+
+        self.world = world
+        self.circuit = circuit
+
+        self.layers = {
+            "circuitLayer": pyglet.graphics.OrderedGroup(0),
+            "background": pyglet.graphics.OrderedGroup(1),
+            "foreground": pyglet.graphics.OrderedGroup(2),
+            "bestCarPlace": pyglet.graphics.OrderedGroup(3)
+        }
+
+    def render(self):
+        self._prepare()
+        self.switch_to()
+        self.dispatch_events()
+        self.dispatch_event('on_draw')
+        self.flip()
+    
+    def _prepare(self):
+        drawList = []
+        screen = self.get_size()
+
+        drawList.append(self.world.draw(self.batch, self.layers['foreground'], self.layers['background'], self.circuit.vertices))
+        drawList.append(self.world.drawBestCarPlace(self.batch, self.layers['bestCarPlace']))
+        drawList.append(self.circuit.draw(self.batch, screen, self.layers['circuitLayer'], hideAll=False))
+        drawList.append(self.world.drawBlindSpot(self.batch, self.layers['circuitLayer']))
+
+        self.drawlist = drawList
+
+    def on_draw(self):
+        self.clear()
+        self.batch.draw()
+
 ### MAIN LOOP
 window = pyglet.window.Window(resizable=True, fullscreen=True)
 
@@ -33,11 +75,12 @@ key_handler = key.KeyStateHandler()
 
 checkpointNumber = len(circuit_checkpoints)
 
-@window.event
+viewer = Viewer(1920, 1080, world, circ)
+
 def on_close():
     running = False
 
-@window.event
+
 def on_draw():
     render()
 
@@ -72,20 +115,10 @@ def update(dt):
         
         world.update(dt, circ.vertices)
 
-def render():
-    window.clear()
+while True:
+    update(1/60)
+    viewer.render()
+    window.push_handlers(key_handler)
 
-    bestCarPlace = pyglet.graphics.OrderedGroup(3)
-    foreground = pyglet.graphics.OrderedGroup(2)
-    background = pyglet.graphics.OrderedGroup(1)
-    circuitLayer = pyglet.graphics.OrderedGroup(0)
-
-    carDrawings = world.draw(batch, foreground, background, circ.vertices)
-    bestCarDrawing = world.drawBestCarPlace(batch, bestCarPlace)
-    circuitDraw = circ.draw(batch, window.get_size(), circuitLayer, hideAll=False)
-    blindSpotDraw = world.drawBlindSpot(batch, circuitLayer)
-    batch.draw()
-
-if __name__ == "__main__":
-    pyglet.clock.schedule_interval(update, .140)
-    pyglet.app.run()
+    if key_handler[key.ESCAPE]:
+        break

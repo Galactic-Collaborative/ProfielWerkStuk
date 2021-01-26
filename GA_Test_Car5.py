@@ -64,7 +64,7 @@ for i, checkpoint in enumerate(checkpoints):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
 circ = circuit.fromJSON(path, window=window_size, method="fromFullPoints")
-world = World(50, circ, window=window_size)
+world = World(50, circ, window=window_size, load=True)
 viewer = Viewer(window_size[0], window_size[1], world, circ)
 
 running = True
@@ -89,6 +89,10 @@ def update(dt):
         world.mutateAll()
     else:
         carList = world.carList
+        if world.load == True:
+            for agent in carList:
+                agent.nn.loadWeights()
+                world.load = False
         if key_handler[key.S]:
             world.show = True
         if key_handler[key.H]:

@@ -17,6 +17,7 @@ class circuit():
             self.checkpoints = self.generateCheckpoints(10)
         else:
             self.checkpoints = checkpoints
+        self.checkpointNumber = len(self.checkpoints)
 
         self.currentCheckpoint = 0
         self.skeletonLines = skeletonLines

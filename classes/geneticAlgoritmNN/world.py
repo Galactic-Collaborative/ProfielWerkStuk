@@ -7,10 +7,11 @@ from pyglet import shapes
 from openpyxl import load_workbook
 
 class World:
-    def __init__(self, cars, carX, carY, window, load=False) -> None:
+    def __init__(self, cars, circ, window, load=False) -> None:
         self.window = Vector2D.fromTuple(window)
-        self.carX = carX
-        self.carY = carY
+        self.circuit = circ
+        self.carX = self.circuit.startingPoint.x
+        self.carY = self.circuit.startingPoint.y
         self.carList = [Agent(self.carX, self.carY, window=self.window) for _ in range(cars)]
         self.oldCarList = []
         self.show = False
@@ -30,6 +31,7 @@ class World:
         self.row = None
         self.blindSpots = []
         self.blindIndex = []
+        self.addBlindSpot()
 
     def draw(self, batch, foreground, background, vertices):
         if self.showA:
@@ -44,10 +46,12 @@ class World:
         drawPlace.opacity = 150
         return drawPlace
 
-    def addBlindSpot(self, points, index):
-        for point in points:
-            self.blindSpots.append(point)
-        self.blindIndex = index
+    def addBlindSpot(self):
+        for line in self.circuit.skeletonLines:
+            startPoint, _ = line.getEndPoints()
+            self.blindSpots.append(startPoint)
+        for i in range(len(self.blindSpots)):
+            self.blindIndex.append(i)
 
     def drawBlindSpot(self, batch, group):
         out = []
@@ -56,12 +60,17 @@ class World:
             out.append(shape)
         return out
 
-    def update(self, dt, vertices):
+    def update(self, dt):
         for agent in self.carList:
             if agent.step > self.maxStep:
                 agent.dead = True
             else:
-                agent.update(dt, vertices)
+                hitbox = self.generateHitbox(agent)
+                agent.car.currentCheckpoint = self.circuit.carCollidedWithCheckpoint(agent.car)
+                if self.circuit.collidedWithCar(hitbox) == True:
+                    agent.dead = True
+
+                agent.update(dt, self.circuit.vertices)
 
     def generateHitbox(self, agent):
         hitbox = agent.generateHitbox()
@@ -73,9 +82,9 @@ class World:
                 return False
         return True
 
-    def calcFitness(self, outsideLines, checkpoints):
+    def calcFitness(self):
         for car in self.carList:
-            car.calcFitness(outsideLines, checkpoints, self.blindSpots, self.blindIndex)
+            car.calcFitness(self.circuit.skeletonLines, self.circuit.checkpointNumber, self.blindSpots, self.blindIndex)
 
     def naturalSelection(self):
         self.gen += 1

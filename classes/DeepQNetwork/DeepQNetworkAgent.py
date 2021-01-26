@@ -82,8 +82,6 @@ class CarRacingDQNAgent:
         self.model.fit(np.array(train_state), np.array(train_target), epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-        else:
-            self.epsilon = self.epsilon_min
 
     def load(self, name):
         self.model.load_weights(name)

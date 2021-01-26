@@ -61,6 +61,7 @@ class circuit():
             else:
                 return cls.fromFullPoints([innerPoints, outerPoints], 
                         startingPoint=startingPoint,
+                        skeletonPoints=skeleton,
                         window=window)
 
     @classmethod

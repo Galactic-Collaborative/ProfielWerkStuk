@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     env = gym.make('CarRacing-v0')
     agent = CarRacingDQNAgent(epsilon=0, memory_size=10000) # Set epsilon to 0 to ensure all actions are instructed by the agent
-    agent.load("save/trial_75.h5")
+    agent.load("save/current_model.h5")
 
     for e in range(play_episodes):
         init_state = env.reset()

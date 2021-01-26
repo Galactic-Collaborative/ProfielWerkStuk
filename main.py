@@ -22,7 +22,7 @@ window = pyglet.window.Window(resizable=True, fullscreen=True, vsync=True)
 #    for point in checkpoint:
 #        circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
-circ = circuit.fromJSON("circuits/BONK_CIRCUIT.json", window=window.get_size())
+circ = circuit.fromJSON("./circuits/BONK_CIRCUIT.json", window=window.get_size(), method="fromFullPoints")
 
 car = Car(circ.startingPoint.x,circ.startingPoint.y)
 car.position = circ.startingPoint

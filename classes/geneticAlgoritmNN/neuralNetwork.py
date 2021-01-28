@@ -8,6 +8,7 @@ class NeuralNetwork:
         self.hiddenSize = 16  
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize) 
+        self.mutationRate = 0.25
 
     def relu(self, x):
         return np.maximum(0, x)        
@@ -48,10 +49,9 @@ class NeuralNetwork:
         self.mutateFunction(self.W2)
 
     def mutateFunction(self, weight):
-        mutationRate = 0.25
         for i in range(len(weight)):
             rand = random.random()
-            if(rand < mutationRate):
+            if(rand < self.mutationRate):
                 weight[i] += random.uniform(-1, 1)
 
     def crossParent(self, car):

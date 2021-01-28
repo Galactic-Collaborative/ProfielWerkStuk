@@ -25,6 +25,7 @@ class World:
         self.bestCar = 0
         self.oldBestAgent = self.carList[self.bestCar]
         self.bestCarPosition = Vector2D(0,0)
+        self.oldBestCount = 0
 
         self.maxStep = 1000
         self.load = load
@@ -134,8 +135,15 @@ class World:
         del nextGen
 
     def mutateAll(self):
-        for i in range(1, len(self.carList)):
-            self.carList[i].nn.mutate()
+        if self.oldBestCount % 5 == 0 and self.oldBestCount != 0:
+            for i in range(1, len(self.carList)):
+                self.carList[i].nn.mutationRate += 0.1
+                self.carList[i].nn.mutate()
+            print("Count +")
+        else:
+            for i in range(1, len(self.carList)):
+                self.carList[i].nn.mutationRate = 0.25
+                self.carList[i].nn.mutate()
 
     def crossParenting(self, x):
         if len(self.carList) > 10:
@@ -184,6 +192,8 @@ class World:
             self.bestCarPosition = self.carList[self.bestCar].car.position
             self.oldBestAgent = self.carList[self.bestCar]
             self.oldCarList = self.carList[:]
+            self.oldBestCount = 0
+            print("Count reset")
             print(f"Best Car: {self.bestCar}")
         else:
             print("Old Best")
@@ -192,4 +202,5 @@ class World:
             self.carList = []
             self.carList = self.oldCarList[:]
             self.bestCar = self.carList.index(self.oldBestAgent)
+            self.oldBestCount += 1
             print(f"Best Car: {self.bestCar}")

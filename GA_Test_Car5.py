@@ -48,18 +48,7 @@ class Viewer(pyglet.window.Window):
         self.batch.draw()
 
 ### MAIN LOOP
-window_size = [1680, 1050]
-
-checkpoints = [[[10,-1],[10,4]],[[4,1],[6,4]],[[13,5],[13,9]],[[15,-1],[15,4]]]
-blindSpots = [[490,80],[220,210],[75,545],[100,850],[245,930],[375,850],[465,730],[485,485],[715,410],[925,415],[1130,645],[945,750],[720,645],[635,860],[735,975],[1000,985],[1180,935],[1330,820],[1425,500],[1300,280],[1070,90]]
-indexSpot = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0]
-blindSpotPoints = [Vector2D(i[0],i[1]) for i in blindSpots]
-
-circuit_checkpoints = []
-for i, checkpoint in enumerate(checkpoints):
-    circuit_checkpoints.append([])
-    for point in checkpoint:
-        circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
+window_size = [1680, 950]
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
@@ -71,8 +60,6 @@ running = True
 
 key = pyglet.window.key
 key_handler = key.KeyStateHandler()
-
-checkpointNumber = len(circuit_checkpoints)
 
 def on_close():
     running = False

@@ -53,7 +53,7 @@ window_size = [1920, 1080]
 dir_path = os.path.dirname(os.path.realpath(__file__))
 path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
 circ = circuit.fromJSON(path, window=window_size, method="fromFullPoints")
-world = World(50, circ, window=window_size, load=False)
+world = World(10, circ, window=window_size, load=True)
 viewer = Viewer(window_size[0], window_size[1], world, circ)
 
 running = True
@@ -89,7 +89,7 @@ def update(dt):
         if key_handler[key.A]:
             world.showA = True
         if key_handler[key.T]:
-            carList[world.bestCar].nn.saveWeights()
+            carList[0].nn.saveWeights()
             print("Best car is saved")
         if key_handler[key.K]:
             for agent in carList:
@@ -103,4 +103,5 @@ while running:
     viewer.push_handlers(key_handler)
 
     if key_handler[key.ESCAPE]:
+        world.carList[0].nn.saveWeights()
         running = False

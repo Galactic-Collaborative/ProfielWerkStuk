@@ -30,13 +30,19 @@ class NeuralNetwork:
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
 
+        np.save("binaryW1", self.W1)
+        np.save("binaryW2", self.W2)
+
     def autoSaveWeights(self):
         np.savetxt("autoSave1.txt", self.W1, fmt="%s")
         np.savetxt("autoSave2.txt", self.W2, fmt="%s")
 
+        np.save("binaryW1", self.W1)
+        np.save("binaryW2", self.W2)
+
     def loadWeights(self):
-        self.W1 = np.loadtxt("w1.txt", dtype=float)
-        self.W2 = np.loadtxt("w2.txt", dtype=float)
+        self.W1 = np.load("binaryW1.npy")
+        self.W2 = np.load("binaryW2.npy")
 
     def clone(self):
         clone = NeuralNetwork()

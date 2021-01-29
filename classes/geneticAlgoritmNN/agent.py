@@ -107,7 +107,7 @@ class Agent:
             if index > 10 and self.car.currentCheckpoint < 3:
                 self.fitness = 0
             else:
-                self.fitness = ((self.car.currentLap * 100) + (abs(distanceLine)*100)+distanceToIndex*100)
+                self.fitness = ((self.car.currentLap * 100) + (abs(distanceLine)*100)+distanceToIndex*100)**2/self.step
             self.index = index
         else:
             self.fitness = 0

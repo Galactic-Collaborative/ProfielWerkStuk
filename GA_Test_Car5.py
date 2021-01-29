@@ -39,7 +39,7 @@ class Viewer(pyglet.window.Window):
         drawList.append(self.world.draw(self.batch, self.layers['foreground'], self.layers['background'], self.circuit.vertices))
         drawList.append(self.world.drawBestCarPlace(self.batch, self.layers['bestCarPlace']))
         drawList.append(self.circuit.draw(self.batch, screen, self.layers['circuitLayer'], hideAll=False))
-        drawList.append(self.world.drawBlindSpot(self.batch, self.layers['circuitLayer']))
+        # drawList.append(self.world.drawBlindSpot(self.batch, self.layers['circuitLayer']))
 
         self.drawlist = drawList
 
@@ -48,12 +48,12 @@ class Viewer(pyglet.window.Window):
         self.batch.draw()
 
 ### MAIN LOOP
-window_size = [1680, 950]
+window_size = [1920, 1080]
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
 circ = circuit.fromJSON(path, window=window_size, method="fromFullPoints")
-world = World(50, circ, window=window_size, load=True)
+world = World(50, circ, window=window_size, load=False)
 viewer = Viewer(window_size[0], window_size[1], world, circ)
 
 running = True

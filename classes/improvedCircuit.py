@@ -137,10 +137,10 @@ class circuit():
         for line in self.vertices:
             out.append(line.draw(batch, group, screen))
         
-        for skeletonLine in self.skeletonLines:
-            skeletonLine.color = (255,0,0)
-            skeletonLine.opacity = 100
-            out.append(skeletonLine.draw(batch, group, screen))
+        # for skeletonLine in self.skeletonLines:
+        #     skeletonLine.color = (255,0,0)
+        #     skeletonLine.opacity = 100
+        #     out.append(skeletonLine.draw(batch, group, screen))
 
         if hideAll:
             out.append(self.checkpoints[self.currentCheckpoint - 1].draw(batch, group, screen))

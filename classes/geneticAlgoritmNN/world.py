@@ -38,7 +38,7 @@ class World:
         if self.showA:
             drawList = [car.draw(batch, foreground, background, vertices, self.show) for car in self.carList]
         else:
-            car = self.carList[self.bestCar]
+            car = self.carList[0]
             drawList = car.draw(batch, foreground, background, vertices, self.show)
         return drawList
     

@@ -13,6 +13,7 @@ class Agent:
         self.fitness = 0
         self.step = 0
         self.maxStep = 1000
+        self.reset = False
         
         self.nn = NeuralNetwork()
         self.bestCar = best
@@ -52,6 +53,9 @@ class Agent:
 
     def update(self, dt, vertices):
         if not self.dead:
+            if self.car.currentCheckpoint > 2 and self.reset == False:
+                self.maxStep += 1000
+                self.reset = True
             self.move(dt, vertices)
 
             pos = self.car.position

@@ -27,6 +27,8 @@ class NeuralNetwork:
         return instruction
 
     def saveWeights(self):
+        print(self.W1)
+        print(self.W2)
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
 
@@ -133,7 +135,7 @@ if __name__ == "__main__":
     # test = 100
     # while test < 100:
     #     nn.mutate()
-    #     test += 1
+    #     test -= 1
     
     # output = nn.feedforward(nn_input)
 

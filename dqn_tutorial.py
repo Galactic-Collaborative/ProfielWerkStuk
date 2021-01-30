@@ -23,7 +23,7 @@ from tf_agents.utils import common
 
 tf.compat.v1.enable_v2_behavior()
 
-num_iterations = 20000 # @param {type:"integer"}
+num_iterations = 200000 # @param {type:"integer"}
 
 initial_collect_steps = 100  # @param {type:"integer"} 
 collect_steps_per_iteration = 1  # @param {type:"integer"}
@@ -43,52 +43,7 @@ In Reinforcement Learning (RL), an environment represents the task or problem to
 Load the CartPole environment from the OpenAI Gym suite. 
 """
 
-env_name = 'CartPole-v0'
-env = suite_gym.load(env_name)
-
-"""You can render this environment to see how it looks. A free-swinging pole is attached to a cart.  The goal is to move the cart right or left in order to keep the pole pointing up."""
-
-#@test {"skip": true}
-env.reset()
-
-"""The `environment.step` method takes an `action` in the environment and returns a `TimeStep` tuple containing the next observation of the environment and the reward for the action.
-
-The `time_step_spec()` method returns the specification for the `TimeStep` tuple. Its `observation` attribute shows the shape of observations, the data types, and the ranges of allowed values. The `reward` attribute shows the same details for the reward.
-
-"""
-
-print('Observation Spec:')
-print(env.time_step_spec().observation)
-
-print('Reward Spec:')
-print(env.time_step_spec().reward)
-
-"""The `action_spec()` method returns the shape, data types, and allowed values of valid actions."""
-
-print('Action Spec:')
-print(env.action_spec())
-
-"""In the Cartpole environment:
-
--   `observation` is an array of 4 floats: 
-    -   the position and velocity of the cart
-    -   the angular position and velocity of the pole 
--   `reward` is a scalar float value
--   `action` is a scalar integer with only two possible values:
-    -   `0` — "move left"
-    -   `1` — "move right"
-
-"""
-
-time_step = env.reset()
-print('Time step:')
-print(time_step)
-
-action = np.array(1, dtype=np.int32)
-
-next_time_step = env.step(action)
-print('Next time step:')
-print(next_time_step)
+env_name = 'FrozenLake-v0'
 
 """Usually two environments are instantiated: one for training and one for evaluation. """
 
@@ -169,20 +124,6 @@ collect_policy = agent.collect_policy
 
 random_policy = random_tf_policy.RandomTFPolicy(train_env.time_step_spec(),
                                                 train_env.action_spec())
-
-"""To get an action from a policy, call the `policy.action(time_step)` method. The `time_step` contains the observation from the environment. This method returns a `PolicyStep`, which is a named tuple with three components:
-
--   `action` — the action to be taken (in this case, `0` or `1`)
--   `state` — used for stateful (that is, RNN-based) policies
--   `info` — auxiliary data, such as log probabilities of actions
-"""
-
-example_environment = tf_py_environment.TFPyEnvironment(
-    suite_gym.load('CartPole-v0'))
-
-time_step = example_environment.reset()
-
-random_policy.action(time_step)
 
 """## Metrics and Evaluation
 

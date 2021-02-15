@@ -26,7 +26,7 @@ tf.compat.v1.enable_v2_behavior()
 
 """## Hyperparameters"""
 
-env_name = "MountainCar-v0" # @param {type:"string"}
+env_name = "CartPole-v1" # @param {type:"string"}
 num_iterations = 250 # @param {type:"integer"}
 collect_episodes_per_iteration = 2 # @param {type:"integer"}
 replay_buffer_capacity = 2000 # @param {type:"integer"}
@@ -206,7 +206,6 @@ avg_return = compute_avg_return(eval_env, tf_agent.policy, num_eval_episodes)
 returns = [avg_return]
 
 for _ in range(num_iterations):
-
   # Collect a few episodes using collect_policy and save to the replay buffer.
   collect_episode(train_env, tf_agent.collect_policy, collect_episodes_per_iteration)
 
@@ -238,4 +237,4 @@ steps = range(0, num_iterations + 1, eval_interval)
 plt.plot(steps, returns)
 plt.ylabel('Average Return')
 plt.xlabel('Step')
-plt.savefig('REINFORCE_pole.png', bbox_inches='tight')
+plt.savefig('REINFORCE_Pole1.png', bbox_inches='tight')

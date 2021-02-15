@@ -4,7 +4,7 @@ from classes.improvedLine import linline
 from classes.Vector import Vector2D
 
 class Car():
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int, scale: float=1.48):
         self.mass = 1
         self.forces = Vector2D(0,0)
         self.carRotation = Vector2D(-1,0)
@@ -20,8 +20,8 @@ class Car():
             sprite.anchor_y = v.height/2
             self.sprites[k] = sprite
         
-        self.scale = 1.48
-        self.image_dimensions = (self.sprites['alive'].width, self.sprites['alive'].height)
+        self.scale = scale
+        self.image_dimensions = (self.sprites['alive'].width * scale, self.sprites['alive'].height * scale)
 
         self.eyesList = [[0, 5000], [5000, 5000], [5000, 0], [5000, -5000], [0, -5000], [-5000, 0]]
         self.hitboxVectors = [
@@ -158,10 +158,10 @@ class Car():
                 self.circuitIntersections.append(intersect[pointIndex[0]])
 
     def forward(self):
-        self.forces += Vector2D(100,0)
+        self.forces += Vector2D(400,0)
 
     def backward(self):
-        self.forces += Vector2D(-100,0)
+        self.forces += Vector2D(-400,0)
 
     def left(self):
         self.forces += Vector2D(0, self._getTurnForce())
@@ -203,16 +203,16 @@ class Car():
 
 
     def _getTurnForce(self):
-        return 4000
+        return 1000
 
     def _calculatePhysics(self, dt):
         #Calculate acceleration based on forces and limit it to 100 pixels per second per second
         self.acceleration = self.forces.rotate(self.carRotation.rotation()) / self.mass
-        self.acceleration.limit(200)
+        self.acceleration.limit(400)
 
         #Calculate velocity based on accelation and limit it to 200 pixels per second
         self.velocity += self.acceleration * dt
-        self.velocity.limit(200)
+        self.velocity.limit(400)
         
         #Determine if we are driving backwards or forwards
         backwards = (self.velocity @ self.carRotation < 0)
@@ -229,5 +229,6 @@ class Car():
         self.currentCheckpoint = 0
         self.forces = Vector2D(0,0)
         self.acceleration = Vector2D(0,0)
+        self.dead = False
         self.velocity = Vector2D(-1*10**-3,0)
         self.position = self.startPosition.copy()

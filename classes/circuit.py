@@ -19,6 +19,7 @@ class circuit():
         self.startingPoint = startingPoint
         self.monocar = monocar    
     
+        self.background = pyglet.image.load('sigmaFalls.png')
     @classmethod
     def fromSkeletonPoints(cls, points, startingPoint=Vector2D(0,0)):
         vertices, checkpoints = cls.generate(points, 100)

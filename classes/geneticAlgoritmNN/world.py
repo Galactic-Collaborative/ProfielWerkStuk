@@ -7,12 +7,12 @@ from pyglet import shapes
 from openpyxl import load_workbook
 
 class World:
-    def __init__(self, cars, circ, window, load=False) -> None:
+    def __init__(self, cars, circ, window, load=False, car_scale=1.48) -> None:
         self.window = Vector2D.fromTuple(window)
         self.circuit = circ
         self.carX = self.circuit.startingPoint.x
         self.carY = self.circuit.startingPoint.y
-        self.carList = [Agent(self.carX, self.carY, window=self.window) for _ in range(cars)]
+        self.carList = [Agent(self.carX, self.carY, window=self.window, scale=car_scale) for _ in range(cars)]
         self.oldCarList = []
         self.show = False
         self.showA = True
@@ -135,14 +135,20 @@ class World:
         del nextGen
 
     def mutateAll(self):
+        print(self.oldBestCount)
         if self.oldBestCount % 5 == 0 and self.oldBestCount != 0:
             for i in range(1, len(self.carList)):
                 self.carList[i].nn.mutationRate += 0.1
                 self.carList[i].nn.mutate()
             print("Count +")
-        else:
+        elif (self.oldBestCount == 0):
+            print("Rate reset")
             for i in range(1, len(self.carList)):
                 self.carList[i].nn.mutationRate = 0.25
+                self.carList[i].nn.mutate()
+        else:
+            print("Something something")
+            for i in range(1, len(self.carList)):
                 self.carList[i].nn.mutate()
 
     def crossParenting(self, x):

@@ -8,6 +8,7 @@ import numpy as np
 import PIL.Image
 
 import tensorflow as tf
+from tensorflow.python.ops.variables import Variable
 
 from tf_agents.agents.dqn import dqn_agent
 from tf_agents.drivers import dynamic_step_driver
@@ -23,7 +24,7 @@ from tf_agents.utils import common
 
 tf.compat.v1.enable_v2_behavior()
 
-num_iterations = 200000 # @param {type:"integer"}
+num_iterations = 20000 # @param {type:"integer"}
 
 initial_collect_steps = 100  # @param {type:"integer"} 
 collect_steps_per_iteration = 1  # @param {type:"integer"}
@@ -43,7 +44,7 @@ In Reinforcement Learning (RL), an environment represents the task or problem to
 Load the CartPole environment from the OpenAI Gym suite. 
 """
 
-env_name = 'FrozenLake-v0'
+env_name = 'CartPole-v1'
 
 """Usually two environments are instantiated: one for training and one for evaluation. """
 
@@ -174,17 +175,15 @@ replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
 
 """For most agents, `collect_data_spec` is a named tuple called `Trajectory`, containing the specs for observations, actions, rewards, and other items."""
 
-agent.collect_data_spec
-
-agent.collect_data_spec._fields
-
 """## Data Collection
 
 Now execute the random policy in the environment for a few steps, recording the data in the replay buffer.
 """
 
+episode_counter = tf.Variable(0)
+
 #@test {"skip": true}
-def collect_step(environment, policy, buffer):
+def collect_step(environment, policy, buffer, epcounter: Variable):
   time_step = environment.current_time_step()
   action_step = policy.action(time_step)
   next_time_step = environment.step(action_step.action)
@@ -193,11 +192,11 @@ def collect_step(environment, policy, buffer):
   # Add trajectory to the replay buffer
   buffer.add_batch(traj)
 
-def collect_data(env, policy, buffer, steps):
+def collect_data(env, policy, buffer, steps, episode_counter):
   for _ in range(steps):
-    collect_step(env, policy, buffer)
+    collect_step(env, policy, buffer, episode_counter)
 
-collect_data(train_env, random_policy, replay_buffer, initial_collect_steps)
+collect_data(train_env, random_policy, replay_buffer, initial_collect_steps, episode_counter)
 
 # Dataset generates trajectories with shape [Bx2x...]
 dataset = replay_buffer.as_dataset(
@@ -206,7 +205,6 @@ dataset = replay_buffer.as_dataset(
     num_steps=2).prefetch(3)
 
 
-dataset
 
 iterator = iter(dataset)
 
@@ -225,7 +223,7 @@ returns = [avg_return]
 for _ in range(num_iterations):
 
   # Collect a few steps using collect_policy and save to the replay buffer.
-  collect_data(train_env, agent.collect_policy, replay_buffer, collect_steps_per_iteration)
+  collect_data(train_env, agent.collect_policy, replay_buffer, collect_steps_per_iteration, episode_counter)
 
   # Sample a batch of data from the buffer and update the agent's network.
   experience, unused_info = next(iterator)
@@ -234,7 +232,7 @@ for _ in range(num_iterations):
   step = agent.train_step_counter.numpy()
 
   if step % log_interval == 0:
-    print('step = {0}: loss = {1}'.format(step, train_loss))
+    print('episode = {2}, step = {0}: loss = {1}'.format(step, train_loss, episode_counter.numpy()))
 
   if step % eval_interval == 0:
     avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
@@ -247,5 +245,4 @@ iterations = range(0, num_iterations + 1, eval_interval)
 plt.plot(iterations, returns)
 plt.ylabel('Average Return')
 plt.xlabel('Iterations')
-plt.ylim(top=250)
-plt.show()
+plt.savefig('DQN_Pole.png', bbox_inches='tight')

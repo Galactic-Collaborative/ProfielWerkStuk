@@ -90,5 +90,6 @@
         [24,8],
         [22, 4.5]
     ],
-    "startingPoint": [12,1]
+    "startingPoint": [12,1],
+    "name":"BonkCircuit"
 }

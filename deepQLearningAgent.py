@@ -4,10 +4,10 @@ import os
 import pyglet
 from gym.envs.box2d.car_racing import CarRacing
 
-# from classes.car import Car
-# from classes.circuit import circuit
-# from classes.Vector import Vector2D
-# from classes.environment import circuitEnv
+from classes.car import Car
+from classes.circuit import circuit
+from classes.Vector import Vector2D
+from classes.environment import circuitEnv
 
 import gym
 import base64
@@ -49,11 +49,8 @@ eval_interval = 1000
 
 save_interval = 2000
 
-train_env_raw = CarRacing(discretize_actions="hard", auto_render=True)
-eval_env_raw = CarRacing(discretize_actions="hard", auto_render=True)
-
-train_env = tf_py_environment.TFPyEnvironment(suite_gym.wrap_env(train_env_raw))
-eval_env = tf_py_environment.TFPyEnvironment(suite_gym.wrap_env(eval_env_raw))
+train_env = tf_py_environment.TFPyEnvironment(circuitEnv())
+eval_env = tf_py_environment.TFPyEnvironment(circuitEnv())
 
 print(train_env.time_step_spec())
 
@@ -135,7 +132,7 @@ dataset = replay_buffer.as_dataset(
     num_parallel_calls=3,
     sample_batch_size=batch_size,
     num_steps=2,
-    single_deterministic_pass=False
+    single_deterministic_pass=True
 ).prefetch(3)
 iterator = iter(dataset)
 

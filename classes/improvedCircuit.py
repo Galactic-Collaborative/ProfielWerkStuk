@@ -9,7 +9,7 @@ from classes.Vector import Vector2D
 from typing import List, Union
 
 class circuit():
-    def __init__(self, vertices: List[List[linline]], checkpoints: List[linline], skeletonLines: List[linline] = None, startingPoint=Vector2D(0,0), monocar: bool=True) -> None:
+    def __init__(self, vertices: List[List[linline]], checkpoints: List[linline], skeletonLines: List[linline] = None, startingPoint=Vector2D(0,0), monocar: bool=True, circ_name=None) -> None:
         self.innerLines = vertices[0]
         self.outerLines = vertices[1]
         self.vertices = [item for sublist in vertices for item in sublist]
@@ -25,11 +25,18 @@ class circuit():
 
         self.startingPoint = startingPoint
         self.monocar = monocar
+
+        if circ_name is not None:
+            self.background = pyglet.image.load(f'{circ_name}-Circuit.png')
+            self.backgroundTopper = pyglet.image.load(f'{circ_name}-Topper.png')
+        else:
+            self.background = pyglet.image.load(f'SigmaFalls-Topper.png')
+            self.backgroundTopper = pyglet.image.load(f'SigmaFalls-Topper.png')
     
     @classmethod
-    def fromSkeletonPoints(cls, points, startingPoint=Vector2D(0,0)):
+    def fromSkeletonPoints(cls, points, startingPoint=Vector2D(0,0), name=None):
         vertices, checkpoints, newStartingPoint = cls.generate(points, width=100, startingPoint=startingPoint)
-        return cls(vertices, checkpoints, newStartingPoint)
+        return cls(vertices, checkpoints, newStartingPoint, circ_name=name)
 
 
     @classmethod
@@ -48,7 +55,7 @@ class circuit():
         skeleton = [Vector2D(i[0],i[1]) for i in circuitDict['skeleton']] if hasSkeleton else None
 
         if hasSkeleton and method=="Skeleton":
-            return cls.fromSkeletonPoints(skeleton, startingPoint=startingPoint)
+            return cls.fromSkeletonPoints(skeleton, startingPoint=startingPoint, name=circuitDict['name'])
         else:
             innerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['inner']]
             outerPoints = [Vector2D(i[0],i[1]) for i in circuitDict['outer']]
@@ -59,18 +66,21 @@ class circuit():
                         checkpoints=checkpoints, 
                         skeletonPoints=skeleton,
                         startingPoint=startingPoint,
-                        window=window)
+                        window=window,
+                        name=circuitDict['name'])
             if hasCheckpoints: 
                 checkpoints = [[Vector2D(i[0][0],i[0][1]), Vector2D(i[1][0], i[1][1])] for i in circuitDict['checkpoints']]
                 return cls.fromFullPoints([innerPoints, outerPoints],
                         checkpoints=checkpoints, 
                         startingPoint=startingPoint,
-                        window=window)
+                        window=window,
+                        name=circuitDict['name'])
             else:
                 return cls.fromFullPoints([innerPoints, outerPoints], 
                         startingPoint=startingPoint,
                         skeletonPoints=skeleton,
-                        window=window)
+                        window=window,
+                        name=circuitDict['name'])
 
     @classmethod
     def fromFullPoints(cls, 
@@ -80,7 +90,8 @@ class circuit():
             numCheckpoints = 10, 
             startingPoint = Vector2D(0,0), 
             window = (1920,1080), 
-            monocar: bool = True
+            monocar: bool = True,
+            name=None
         ) -> circuit:
         
         lines = []
@@ -110,7 +121,7 @@ class circuit():
                 j = (i+1)%len(skeletonPoints)
                 skeletonLines.append(linline.fromPoints(skeletonPoints[i]*scale+margin,skeletonPoints[j]*scale+margin))
 
-        return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar, skeletonLines=skeletonLines)
+        return cls(lines, checkpoint, startingPoint=startPoint, monocar=monocar, skeletonLines=skeletonLines, circ_name=name)
 
     def collidedWithCar(self, hitbox) -> bool:
         for line in self.vertices:

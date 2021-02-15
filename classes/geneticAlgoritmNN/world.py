@@ -92,7 +92,7 @@ class World:
         self.autoGen += 1
         if self.autoGen == 10:
             self.autoGen = 0
-            self.carList[self.bestCar].nn.autoSaveWeights()
+            self.carList[0].nn.autoSaveWeights()
         print("------------------------------------------------------------------------------------------------------------------------------")
         print(f"NEXT GEN: {self.gen}")
 
@@ -140,9 +140,12 @@ class World:
                 self.carList[i].nn.mutationRate += 0.1
                 self.carList[i].nn.mutate()
             print("Count +")
-        else:
+        elif (self.oldBestCount == 0):
             for i in range(1, len(self.carList)):
                 self.carList[i].nn.mutationRate = 0.25
+                self.carList[i].nn.mutate()
+        else:
+            for i in range(1, len(self.carList)):
                 self.carList[i].nn.mutate()
 
     def crossParenting(self, x):

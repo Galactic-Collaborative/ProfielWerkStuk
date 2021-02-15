@@ -208,10 +208,9 @@ class Car():
     def _calculatePhysics(self, dt):
         #Calculate acceleration based on forces and limit it to 100 pixels per second per second
         self.acceleration = self.forces.rotate(self.carRotation.rotation()) / self.mass
-        self.acceleration.limit(200)
 
         #Calculate velocity based on accelation and limit it to 200 pixels per second
-        self.velocity += self.acceleration * dt
+        self.velocity += self.acceleration.limit(200) * dt
         self.velocity.limit(200)
         
         #Determine if we are driving backwards or forwards

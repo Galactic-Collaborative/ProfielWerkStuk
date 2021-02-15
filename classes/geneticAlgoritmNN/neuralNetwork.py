@@ -8,7 +8,7 @@ class NeuralNetwork:
         self.hiddenSize = 16  
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize) 
-        self.mutationRate = 0.25
+        self.mutationRate = 1
 
     def relu(self, x):
         return np.maximum(0, x)        
@@ -27,8 +27,6 @@ class NeuralNetwork:
         return instruction
 
     def saveWeights(self):
-        print(self.W1)
-        print(self.W2)
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
 

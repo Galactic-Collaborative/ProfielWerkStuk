@@ -53,7 +53,7 @@ window_size = [1920, 1080]
 dir_path = os.path.dirname(os.path.realpath(__file__))
 path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
 circ = circuit.fromJSON(path, window=window_size, method="fromFullPoints")
-world = World(10, circ, window=window_size, load=True)
+world = World(50, circ, window=window_size, load=False)
 viewer = Viewer(window_size[0], window_size[1], world, circ)
 
 running = True

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import random
 
@@ -30,24 +32,25 @@ class NeuralNetwork:
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
 
-        np.save("binaryW1", self.W1)
-        np.save("binaryW2", self.W2)
+        np.save("binaryW1SIGMA", self.W1)
+        np.save("binaryW2SIGMA", self.W2)
 
     def autoSaveWeights(self):
         np.savetxt("autoSave1.txt", self.W1, fmt="%s")
         np.savetxt("autoSave2.txt", self.W2, fmt="%s")
 
-        np.save("binaryW1", self.W1)
-        np.save("binaryW2", self.W2)
+        np.save("binaryW1SIGMA", self.W1)
+        np.save("binaryW2SIGMA", self.W2)
 
     def loadWeights(self):
-        self.W1 = np.load("binaryW1.npy")
-        self.W2 = np.load("binaryW2.npy")
+        self.W1 = np.load("binaryW1SIGMA.npy")
+        self.W2 = np.load("binaryW2SIGMA.npy")
 
     def clone(self):
         clone = NeuralNetwork()
         clone.W1 = np.copy(self.W1)
         clone.W2 = np.copy(self.W2)
+        clone.mutationRate = self.mutationRate
         return clone
 
     def mutate(self):
@@ -60,10 +63,11 @@ class NeuralNetwork:
             if(rand < self.mutationRate):
                 weight[i] += random.uniform(-1, 1)
 
-    def crossParent(self, car):
+    def crossParent(self, car: NeuralNetwork):
         parent = NeuralNetwork()
         parent.W1 = np.copy(self.W1)
         parent.W2 = np.copy(car.W2)
+        parent.mutationRate = 0.5 * (self.mutationRate + car.mutationRate)
         return parent
 
 if __name__ == "__main__":

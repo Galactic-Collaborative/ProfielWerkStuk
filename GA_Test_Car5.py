@@ -38,20 +38,21 @@ class Viewer(pyglet.window.Window):
 
         drawList.append(self.world.draw(self.batch, self.layers['foreground'], self.layers['background'], self.circuit.vertices))
         drawList.append(self.world.drawBestCarPlace(self.batch, self.layers['bestCarPlace']))
-        drawList.append(self.circuit.draw(self.batch, screen, self.layers['circuitLayer'], hideAll=False))
-        # drawList.append(self.world.drawBlindSpot(self.batch, self.layers['circuitLayer']))
-
+        #drawList.append(self.circuit.draw(self.batch, screen, self.layers['circuitLayer'], hideAll=False))
+        #drawList.append(self.world.drawBlindSpot(self.batch, self.layers['circuitLayer']))
+        
         self.drawlist = drawList
 
     def on_draw(self):
         self.clear()
+        self.circuit.background.blit(0,0)
         self.batch.draw()
 
 ### MAIN LOOP
 window_size = [1920, 1080]
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
+path = dir_path + '/' + 'circuits/SIGMA_FALLS_GA.json'
 circ = circuit.fromJSON(path, window=window_size, method="fromFullPoints")
 world = World(50, circ, window=window_size, load=False)
 viewer = Viewer(window_size[0], window_size[1], world, circ)
@@ -63,9 +64,6 @@ key_handler = key.KeyStateHandler()
 
 def on_close():
     running = False
-
-def on_draw():
-    render()
 
 def update(dt):
     viewer.push_handlers(key_handler)

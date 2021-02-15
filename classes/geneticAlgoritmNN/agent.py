@@ -6,8 +6,9 @@ from classes.Vector import Vector2D
 from math import inf
 
 class Agent:
-    def __init__(self, carX, carY, window, best=False):
-        self.car = Car(carX, carY)
+    def __init__(self, carX, carY, window, best=False, scale: float = 1.48):
+        self.car = Car(carX, carY, scale)
+        self.scale = scale
         self.window = window
         self.dead = self.car.dead
         self.fitness = 0
@@ -121,6 +122,6 @@ class Agent:
             self.fitness = 0
 
     def clone(self, carX, carY, best):
-        baby = Agent(carX, carY, window=self.window, best=best)
+        baby = Agent(carX, carY, window=self.window, best=best, scale=self.scale)
         baby.nn = self.nn.clone()
         return baby

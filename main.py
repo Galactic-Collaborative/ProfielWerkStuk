@@ -6,7 +6,7 @@ from classes.Vector import Vector2D
 
 ### MAIN LOOP
 # config = pyglet.gl.Config(sample_buffers=1, samples=4)
-window = pyglet.window.Window(resizable=True, fullscreen=True, vsync=True)
+window = pyglet.window.Window(resizable=False, width=1920, height=1080, vsync=True)
 
 #inner_points = [[18,3],[8,3],[5,4],[3,6],[2,9],[2,12],[3,14],[4,14],[6,12],[7,8],[8,7],[12,6],[16,6],[19,9],[20,11],[16,13],[13,12],[12,14],[13,15],[17,16],[20,15],[22,13],[23,8],[21,5]] #Bonk Circuit
 #outer_points = [[18,0],[8,0],[2,3],[0,9],[0,14],[2,16],[5,16],[8,12],[9,9],[12,8],[15,8],[17,10],[16,11],[12,10],[11,11],[10,13],[10,15],[12,17],[17,17],[20,16],[23,14],[25,8],[23,4]] #Bonk Circuit
@@ -24,14 +24,23 @@ window = pyglet.window.Window(resizable=True, fullscreen=True, vsync=True)
 #        circuit_checkpoints[i].append(Vector2D(point[0],point[1]))
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-path = dir_path + '/' + 'circuits/BONK_CIRCUIT_GACHECKPOINTS.json'
-circ = circuit.fromJSON(path, window=window.get_size(), method="fromFullPoints")
+path = dir_path + '/' + 'circuits/SIGMA_FALLS_GA.json'
+
+batch = pyglet.graphics.Batch()
+topper = pyglet.graphics.OrderedGroup(3)
+foreground = pyglet.graphics.OrderedGroup(2)
+background = pyglet.graphics.OrderedGroup(1)
+circuitLayer = pyglet.graphics.OrderedGroup(0)
+
+running = True
+
+circ = circuit.fromJSON(path, window=[1920,1080], method="fromFullPoints")
 
 car = Car(circ.startingPoint.x,circ.startingPoint.y)
 car.position = circ.startingPoint
 
-batch = pyglet.graphics.Batch()
-running = True
+backGround = pyglet.sprite.Sprite(circ.background, x=0,y=0, batch=batch, group=circuitLayer)
+foreGround = pyglet.sprite.Sprite(circ.backgroundTopper, x=0,y=0, batch=batch, group=topper)
 
 key = pyglet.window.key
 key_handler = key.KeyStateHandler()
@@ -61,14 +70,11 @@ def update(dt):
 
 def render():
     window.clear()
-    foreground = pyglet.graphics.OrderedGroup(2)
-    background = pyglet.graphics.OrderedGroup(1)
-    circuitLayer = pyglet.graphics.OrderedGroup(0)
 
     e = car.draw(batch, foreground)
-    a = car.eyes(batch, background)
-    b = circ.draw(batch, window.get_size(), circuitLayer)
-    c = car.hitbox(batch, background)
+    #a = car.eyes(batch, background)
+    #b = circ.draw(batch, window.get_size(), background)
+    #c = car.hitbox(batch, background)
     d = car.intersectEyes(batch, circ.vertices, background)
     #f = circ.generateVisualCheckpoints(batch, foreground)
 
@@ -81,5 +87,5 @@ def render():
     batch.draw()
 
 if __name__ == "__main__":
-    pyglet.clock.schedule_interval(update, 1/120.0)
+    pyglet.clock.schedule_interval(update, 1/60.0)
     pyglet.app.run()

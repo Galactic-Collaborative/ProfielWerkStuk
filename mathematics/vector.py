@@ -151,7 +151,7 @@ class Vector2D:
 
         return self
 
-    def normalize(self):
+    def Normalize(self):
         """Normalize the vector"""
         if abs(self) != 0:
             new_self = self / abs(self)
@@ -162,7 +162,7 @@ class Vector2D:
     def copy(self):
         return Vector2D(self.x, self.y)
 
-    def lerp(self, other: Vector2D, t: float):
+    def Lerp(self, other: Vector2D, t: float):
         return self * (1-t) + other * t
 
 
@@ -187,10 +187,10 @@ if __name__ == "__main__":
     # print(v5.rotate(90))
 
 
-    v2.normalize()
+    v2.Normalize()
     print(f"V2 normalize:{v2}")
-    print(f"V3 normalize:{v3.normalize()}")
-    d = v2.dot(v3.normalize())
+    print(f"V3 normalize:{v3.Normalize()}")
+    d = v2.dot(v3.Normalize())
     print(d)
 
     v5 = Vector2D(5,1)

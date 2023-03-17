@@ -8,10 +8,22 @@ class Road:
 
         The Road is a list of lines. The lines are connected to each other.
     """
-    lines : list[Line]
+    left : list[Line]
+    right: list[Line]
 
-    def __init__(self, lines: list[Line]) -> None:
-        self.lines = lines
+    whole: list[Line]
+
+    def __init__(self, left: list[Line], right: list[Line]):
+        """Create a new Road
+
+        Args:
+            left (list[Line]): The left lines of the road
+            right (list[Line]): The right lines of the road
+        """
+        self.left = left
+        self.right = right
+
+        self.whole = left + right
 
     def Intersect(self, ray: Ray) -> Vector2D | None:
         """Calculate the intersection point of a ray with the circuit
@@ -22,7 +34,7 @@ class Road:
         Returns:
             `Vector2D | None` The intersection point or None if there is no intersection
         """
-        intersections = [point for line in self.lines if (point := line.Intersect(ray)) is not None]
+        intersections = [point for line in self.whole if (point := line.Intersect(ray)) is not None]
         distances = [(point - ray.origin).Length() for point in intersections]
         return intersections[distances.index(min(distances))] if len(distances) > 0 else None
 
@@ -36,4 +48,4 @@ class Road:
         Returns:
             `bool` True if the ray intersects with the circuit
         """
-        return any(line.Intersect(ray) is not None for line in self.lines)
+        return any(line.Intersect(ray) is not None for line in self.whole)

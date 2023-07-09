@@ -4,6 +4,7 @@ import pyglet
 import math
 from .mathematics.lines import Ray
 from .mathematics.vector import Vector2D
+from .mathematics.shape import Shape
 
 
 class RigidBody:

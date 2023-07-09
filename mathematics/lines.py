@@ -1,18 +1,22 @@
 from __future__ import annotations
-from mathematics.vector import Vector2D
+
+if(__name__ == "__main__"):
+    from vector import Vector2D
+else:
+    from mathematics.vector import Vector2D
 
 class Ray:
     direction : Vector2D
     origin : Vector2D
 
-    def __init__(self, direction: Vector2D, origin: Vector2D) -> None:
+    def __init__(self, origin: Vector2D, direction: Vector2D) -> None:
         self.direction = direction
         self.origin = origin
 
     def __repr__(self) -> str:
         return f"Ray({self.direction}, {self.origin})"
 
-    def Calc(self, t: float) -> Vector2D:
+    def calc(self, t: float) -> Vector2D:
         if t < 0: raise ValueError("t must be positive")
         return self.origin + self.direction * t
 
@@ -20,15 +24,15 @@ class Line:
     direction : Vector2D
     origin : Vector2D
 
-    def __init__(self, direction: Vector2D, origin: Vector2D) -> None:
-        self.direction = direction
+    def __init__(self, origin: Vector2D, direction: Vector2D) -> None:
         self.origin = origin
+        self.direction = direction.normalized()
 
     def __repr__(self) -> str:
-        return f"Line({self.direction}, {self.origin})"
+        return f"Line(origin={self.origin}, direction={self.direction})"
 
     @classmethod
-    def FromPoints(cls, a: Vector2D, b: Vector2D) -> Line:
+    def from_points(cls, a: Vector2D, b: Vector2D) -> Line:
         """Create a line from two points
 
         Args:
@@ -39,9 +43,9 @@ class Line:
             Line: The line through the two given points
         """
         direction = b - a
-        return cls(direction, a)
+        return cls(a, direction)
 
-    def Intersect(self, ray: Ray) -> Vector2D | None:
+    def intersect(self, ray: Ray) -> Vector2D | None:
         """Calculate the intersection point of two lines
 
         Args:
@@ -50,16 +54,17 @@ class Line:
         Returns:
             `Vector2D | None` The intersection point or None if there is no intersection
         """
-        n = self.direction @ ray.direction
-        if n == 0:
+        n = ray.direction.perpendicular()
+        p = self.direction @ n
+        if p == 0:
             return None
 
         diff = ray.origin - self.origin
-        t = (diff @ ray.direction) / n
+        t = (diff @ n) / p
 
-        return self.Calc(t)
+        return self.calc(t)
 
-    def Distance(self, point: Vector2D) -> float:
+    def distance(self, point: Vector2D) -> float:
         """Calculate the distance between a line and a point
 
         Args:
@@ -68,9 +73,9 @@ class Line:
         Returns:
             float: The distance between the line and the point
         """
-        return abs((point - self.origin) @ self.direction.Perpendicular())
+        return abs((point - self.origin) @ self.direction.perpendicular())
 
-    def Calc(self, t: float) -> Vector2D:
+    def calc(self, t: float) -> Vector2D:
         return self.origin + self.direction * t
 
 class BoundedLine(Line):
@@ -78,13 +83,13 @@ class BoundedLine(Line):
 
     __endPoint : Vector2D;
 
-    def __init__(self, direction: Vector2D, origin: Vector2D, length:float) -> None:
-        super().__init__(direction, origin)
+    def __init__(self, origin: Vector2D, direction: Vector2D, length:float) -> None:
+        super().__init__(origin, direction)
         self.length = length
-        __endPoint = origin + direction * length;
+        __endPoint = origin + self.direction * length;
 
     @classmethod
-    def FromPoints(cls, a: Vector2D, b: Vector2D) -> BoundedLine:
+    def from_points(cls, a: Vector2D, b: Vector2D) -> BoundedLine:
         """Create a line from two points
 
         Args:
@@ -95,9 +100,9 @@ class BoundedLine(Line):
             BoundedLine: The line between the two given points
         """
         direction = b - a
-        return cls(direction, a, direction.Length())
+        return cls(a, direction, direction.length())
 
-    def Intersect(self, ray: Ray) -> Vector2D | None:
+    def intersect(self, ray: Ray) -> Vector2D | None:
         """Calculate the intersection point of two lines
 
         Args:
@@ -106,20 +111,20 @@ class BoundedLine(Line):
         Returns:
             `Vector2D | None` The intersection point or None if there is no intersection
         """
-        intersection = super().Intersect(ray);
+        intersection = super().intersect(ray);
 
         # If there is no intersection, return None
         if (intersection is None):
             return None;
 
         # If the intersection is within the bounds of the line, return the intersection
-        if(intersection - self.origin).Length() <= self.length:
+        if (intersection - self.origin).normalized() == self.direction and (intersection - self.origin).length() <= self.length:
             return intersection
 
         # Otherwise, return None
         return None;
 
-    def Distance(self, point: Vector2D) -> float:
+    def distance(self, point: Vector2D) -> float:
         """Calculate the distance between a line and a point, taken into account the bounds of the line
 
         Args:
@@ -133,16 +138,16 @@ class BoundedLine(Line):
         t = (point - self.origin) @ self.direction;
 
         if t < 0:
-            return (point - self.origin).Length();
+            return (point - self.origin).length();
         elif t > self.length:
-            return (point - self.__endPoint).Length();
+            return (point - self.__endPoint).length();
         else:
-            return super().Distance(point);
+            return super().distance(point);
 
     def __repr__(self) -> str:
-        return f"BoundedLine({self.direction}, {self.origin}, {self.length})"
+        return f"BoundedLine(origin={self.origin},direction={self.direction},length={self.length})"
 
-    def Calc(self, t: float) -> Vector2D:
+    def calc(self, t: float) -> Vector2D:
         """Calculate the point on the line at a given distance
 
         Args:
@@ -155,5 +160,30 @@ class BoundedLine(Line):
             Vector2D: The point on the line at the given distance
         """
         if t <= self.length:
-            return super().Calc(t)
+            return super().calc(t)
         else: raise ValueError("t is out of bounds");
+
+
+
+if(__name__ == "__main__"):
+    # Test the Line class
+    line = Line.from_points(Vector2D(0, 0), Vector2D(1, 1))
+
+    print(line)
+
+    print(line.intersect(Ray(Vector2D(0, 1), Vector2D(1, 0))))
+
+    print(line.distance(Vector2D(0, 1)))
+
+    print(line.calc(1))
+
+    # Test the BoundedLine class
+    boundedLine = BoundedLine.from_points(Vector2D(0, 0), Vector2D(1, 1))
+
+    print(boundedLine)
+
+    print(boundedLine.intersect(Ray(Vector2D(0, 0.5), Vector2D(1, 0))))
+
+    print(boundedLine.distance(Vector2D(0, 1)))
+
+    print(boundedLine.calc(1))

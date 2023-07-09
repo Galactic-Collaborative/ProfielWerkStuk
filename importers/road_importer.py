@@ -1,10 +1,11 @@
-from mathematics.lines import Line
+import math
+from mathematics.lines import Line, BoundedLine
 from mathematics.vector import Vector2D
 from road import Road
 from typing import Any
 
 
-def ImportJSON(data: Any) -> Road:
+def import_json(data: Any) -> Road:
     """Import a circuit from a JSON file
 
     Args:
@@ -16,14 +17,14 @@ def ImportJSON(data: Any) -> Road:
     type : str = data["road"]["generator"]
     match type:
         case "skeleton":
-            return ImportSkeleton(data["road"])
+            return import_skeleton(data["road"])
         case "custom":
-            return ImportCustom(data["road"])
+            return import_custom(data["road"])
         case _:
             raise ValueError(f"Unknown road type: {type}")
 
 
-def ImportSkeleton(data: Any) -> Road:
+def import_skeleton(data: Any) -> Road:
     """Import a skeleton road from a JSON file
 
     The road must have a inner and outer line defined
@@ -35,14 +36,15 @@ def ImportSkeleton(data: Any) -> Road:
         Road: The imported Road
     """
 
-    skeleton = [Vector2D(point[0], point[1]) for point in data]
-    width = data["width"]
+    skeleton = [Vector2D(point[0], point[1]) for point in data["points"]]
+    width = float(data["width"])
 
-    (inner, outer) = createRoadFromSkeleton(skeleton, width)
+    (inner, outer) = create_road_from_skeleton(skeleton, width)
 
     return Road(inner, outer)
 
-def ImportCustom(data : Any) -> Road:
+
+def import_custom(data : Any) -> Road:
     """Import a custom road from a JSON file
 
     The road must have a inner and outer line defined
@@ -54,12 +56,13 @@ def ImportCustom(data : Any) -> Road:
         Road: The imported Road
     """
 
-    outer = CreateLinesFromData(data["outer"])
-    inner = CreateLinesFromData(data["inner"])
+    outer = create_lines_from_data(data["outer"])
+    inner = create_lines_from_data(data["inner"])
 
     return Road(outer, inner)
 
-def CreateLinesFromData(points : list[list[float]]) -> list[Line]:
+
+def create_lines_from_data(points : list[list[float]]) -> list[BoundedLine]:
     """Create a line from a list of points
 
     Args:
@@ -69,11 +72,12 @@ def CreateLinesFromData(points : list[list[float]]) -> list[Line]:
         Line: The created line
     """
 
-    vectorPoints = [Vector2D(point[0], point[1]) for point in points]
+    vector_points = [Vector2D(point[0], point[1]) for point in points]
 
-    return CreateLines(vectorPoints)
+    return create_lines(vector_points)
 
-def CreateLines(points: list[Vector2D]) -> list[Line]:
+
+def create_lines(points: list[Vector2D]) -> list[BoundedLine]:
     """Create a line from a list of points
 
     Args:
@@ -83,18 +87,19 @@ points (list[Vector2D]): The points of the line
         Line: The created line
     """
 
-    lines : list[Line] = []
+    lines : list[BoundedLine] = []
 
-    prevPoint = points[0]
+    previous_point = points[0]
     for point in points[1:]:
-        lines.append(Line(prevPoint, point))
-        prevPoint = point
+        lines.append(BoundedLine.from_points(previous_point, point))
+        previous_point = point
 
-    lines.append(Line(prevPoint, points[0]))
+    lines.append(BoundedLine.from_points(previous_point, points[0]))
 
     return lines
 
-def createRoadFromSkeleton(skeleton : list[Vector2D], width: float) -> tuple[list[Line], list[Line]]:
+
+def create_road_from_skeleton(skeleton : list[Vector2D], width: float) -> tuple[list[BoundedLine], list[BoundedLine]]:
     """Create a road from a skeleton
 
     Args:
@@ -105,24 +110,28 @@ def createRoadFromSkeleton(skeleton : list[Vector2D], width: float) -> tuple[lis
         tuple[list[Line], list[Line]]: The inner and outer lines of the road
     """
 
-    innerPoints : list[Vector2D] = []
-    outerPoints : list[Vector2D] = []
+    inner_points : list[Vector2D] = []
+    outer_points : list[Vector2D] = []
 
-    a = skeleton[0]
-    b = skeleton[1]
-    for c in skeleton[2:]:
-        r = (b - a).Normalize()
-        l = (b - c).Normalize()
+    previousPoint = skeleton[-2]
+    currentPoint = skeleton[-1]
+    for nextPoint in skeleton:
+        r = (currentPoint - previousPoint).normalized()
+        l = (currentPoint - nextPoint).normalized()
 
-        d = (r + l).Normalize()
+        d = (r + l).normalized()
 
-        innerPoints.append(b + d * width / 2)
-        outerPoints.append(b - d * width / 2)
+        if(r.rotate(math.pi/2) @ l >= 0):
+            inner_points.append(currentPoint + d * width / 2)
+            outer_points.append(currentPoint - d * width / 2)
+        else:
+            inner_points.append(currentPoint - d * width / 2)
+            outer_points.append(currentPoint + d * width / 2)
 
-        a = b
-        b = c
+        previousPoint = currentPoint
+        currentPoint = nextPoint
 
-    inner = CreateLines(innerPoints)
-    outer = CreateLines(outerPoints)
+    inner = create_lines(inner_points)
+    outer = create_lines(outer_points)
 
     return (inner, outer)

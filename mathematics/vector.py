@@ -8,13 +8,13 @@ class Vector2D:
     such as Line.
 
     """
+
     x: float
     y: float
 
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
-
 
     @classmethod
     def fromTuple(cls, t: Tuple[float, float]):
@@ -32,7 +32,6 @@ class Vector2D:
         """
         return Vector2D(self.x + other.x, self.y + other.y)
 
-
     def __sub__(self, other: Vector2D) -> Vector2D:
         """Subtract two vectors using the '-' operator
             ### Args:
@@ -40,13 +39,19 @@ class Vector2D:
         """
         return Vector2D(self.x - other.x, self.y - other.y)
 
-
-    def __mul__(self, other: float) -> Vector2D:
+    def __mul__(self, other: float | Vector2D) -> Vector2D:
         """Multiply a vector using the '*' operator
             ### Args:
                 other: A floating point.
         """
-        return Vector2D(self.x * other, self.y * other)
+
+        if(type(other) == Vector2D):
+            return Vector2D(self.x * other.x, self.y * other.y)
+        if(type(other) == float):
+            return Vector2D(self.x * other, self.y * other)
+
+        raise TypeError(f"Cannot multiply Vector2D with {type(other)}")
+
 
     def __truediv__(self, other:float) -> Vector2D:
         """Divide a vector using the '/' operator
@@ -65,7 +70,6 @@ class Vector2D:
         """
         return self.x*other.x + self.y*other.y
 
-    ### Self Algebraic func
     def __iadd__(self, other: Vector2D):
         self.x += other.x
         self.y += other.y
@@ -91,6 +95,9 @@ class Vector2D:
     def __neg__(self) -> Vector2D:
         return Vector2D(-self.x, -self.y)
 
+    def __eq__(self, other: Vector2D) -> bool:
+        return self.x == other.x and self.y == other.y
+
     def dot(self, other: Vector2D) -> float:
         """Multiply the two vectors using the dot product method
         Multiply two vectors using the dot product.
@@ -99,10 +106,10 @@ class Vector2D:
         """
         return self.x*other.x + self.y*other.y
 
-    def Length(self) -> float:
+    def length(self) -> float:
         return abs(self);
 
-    def Rotation(self, other: Vector2D | None=None) -> float:
+    def rotation(self, other: Vector2D | None=None) -> float:
         """Calculate the rotation of one or two vectors
         The rotation is calculated with the vector (1,0)
         if other is None or omitted
@@ -116,21 +123,20 @@ class Vector2D:
 
         return angle
 
-    def Rotate(self, rotation: float) -> Vector2D:
+    def rotate(self, rotation: float) -> Vector2D:
         """Rotate the vector
 
         The vector is rotated by the given rotation.
 
-        Args: rotation - `float | int` rotation in degrees
+        Args: rotation - `float | int` rotation in radians
         """
-        rotation = math.radians(rotation)
 
         x2 = math.cos(rotation) * self.x - math.sin(rotation) * self.y
         y2 = math.sin(rotation) * self.x + math.cos(rotation) * self.y
 
         return Vector2D(x2,y2)
 
-    def Perpendicular(self) -> Vector2D:
+    def perpendicular(self) -> Vector2D:
         """Calculate the perpendicular vector
 
         The perpendicular vector is calculated by swapping the x and y values and
@@ -144,14 +150,14 @@ class Vector2D:
         The vector will be scaled to the given limit if it exceeds the limit.
         """
         if abs(self) > limit:
-            angle = self.Rotation()
+            angle = self.rotation()
             x = math.cos(angle) * limit
             y = math.sin(angle) * limit
             self.x, self.y = x, y
 
         return self
 
-    def Normalize(self):
+    def normalized(self) -> Vector2D:
         """Normalize the vector"""
         if abs(self) != 0:
             new_self = self / abs(self)
@@ -162,7 +168,7 @@ class Vector2D:
     def copy(self):
         return Vector2D(self.x, self.y)
 
-    def Lerp(self, other: Vector2D, t: float):
+    def lerp(self, other: Vector2D, t: float):
         return self * (1-t) + other * t
 
 
@@ -171,11 +177,10 @@ if __name__ == "__main__":
     # v1 = Vector2D(-1,-1)
     # print(v1.rotation(degrees=True))
 
-    v2 = Vector2D(50,-100)
+    v2 = Vector2D(1,2)
     # print(v2.rotation())
 
-    v3 = Vector2D(150,125)
-    v3 = v3 * 0.1
+    v3 = Vector2D(2,3)
 
     # v4 = Vector2D(0,6)
     # v4.limit(5)
@@ -187,11 +192,12 @@ if __name__ == "__main__":
     # print(v5.rotate(90))
 
 
-    v2.Normalize()
+    v2.normalized()
     print(f"V2 normalize:{v2}")
-    print(f"V3 normalize:{v3.Normalize()}")
-    d = v2.dot(v3.Normalize())
+    print(f"V3 normalize:{v3.normalized()}")
+    d = v2.dot(v3)
     print(d)
 
+    print(Vector2D(1,0) == Vector2D(1,0))
     v5 = Vector2D(5,1)
-    print(v5.Rotate(90))
+    print(v5.rotate(90))
